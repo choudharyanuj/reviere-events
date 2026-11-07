@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reviere Events | Luxury Event Planning & Management | Patna, Bihar</title>
+  <meta name="description" content="Reviere Events — Premier Event Planning & Management in Patna, Bihar. Founded & Directed by Manish Kumar. Specializing in Weddings, Corporate Events, Private Celebrations, and Stage Shows.">
+  <meta name="keywords" content="Reviere Events, Manish Kumar event planner, event management Patna, wedding planner Patna, corporate events Bihar, stage performance choreographer, vendor management Patna">
+  <meta name="author" content="Reviere Events - Manish Kumar">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://www.reviereevent.com/">
+  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+
+  <!-- Open Graph / Facebook / WhatsApp -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.reviereevent.com/">
+  <meta property="og:site_name" content="Reviere Events">
+  <meta property="og:title" content="Reviere Events | Luxury Event Planning & Management">
+  <meta property="og:description" content="Crafting Unforgettable Moments — Weddings, Corporate Events, Private Parties & Stage Choreography in Patna, Bihar. Founded & Directed by Manish Kumar.">
+  <meta property="og:image" content="https://www.reviereevent.com/assets/images/event-hero.jpg">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://www.reviereevent.com/">
+  <meta name="twitter:title" content="Reviere Events | Luxury Event Planning & Management">
+  <meta name="twitter:description" content="Crafting Unforgettable Moments — Weddings, Corporate Events, Private Parties & Stage Choreography in Patna, Bihar. Founded & Directed by Manish Kumar.">
+  <meta name="twitter:image" content="https://www.reviereevent.com/assets/images/event-hero.jpg">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Remix Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Schema.org -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "EventPlanner",
+    "name": "Reviere Events",
+    "url": "https://www.reviereevent.com/",
+    "image": "https://www.reviereevent.com/assets/images/event-hero.jpg",
+    "description": "Exclusive Event Planner & Manager specializing in Weddings, Corporate Events, Celebrations & Live Choreographed Performances in Patna, Bihar. Founded and Directed by Manish Kumar.",
+    "founder": {
+      "@type": "Person",
+      "name": "Manish Kumar",
+      "jobTitle": "Owner & Director"
+    },
+    "telephone": "+918893535829",
+    "email": "reviereevent@gmail.com",
+    "priceRange": "$$",
+    "areaServed": [
+      {
+        "@type": "City",
+        "name": "Patna"
+      },
+      {
+        "@type": "AdministrativeArea",
+        "name": "Bihar"
+      }
+    ],
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Patna",
+      "addressRegion": "Bihar",
+      "addressCountry": "IN"
+    }
+  }
+  </script>
+</head>
+<body>
+
+  <!-- ============ NAVIGATION ============ -->
+  <nav class="navbar" id="navbar">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-logo" aria-label="Reviere Events Home">
+        <div class="nav-logo-monogram">RE</div>
+        <span>REVIERE <span class="gold-accent">EVENTS</span></span>
+      </a>
+
+      <div class="nav-links" id="navLinks">
+        <a href="index.html" class="nav-link active">Home</a>
+        <a href="events.html" class="nav-link">Services</a>
+        <a href="about.html" class="nav-link">About</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+      </div>
+
+      <div class="nav-actions">
+        <a href="javascript:void(0)" onclick="openWhatsApp('Hi Manish! I would like to inquire about event planning services with Reviere Events.', event)" class="btn btn-whatsapp btn-sm nav-whatsapp-btn">
+          <i class="ri-whatsapp-line"></i>
+          <span>WhatsApp</span>
+        </a>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Overlay -->
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+
+  <!-- Mobile Drawer -->
+  <div class="mobile-drawer" id="mobileDrawer">
+    <a href="index.html" class="nav-link active">Home</a>
+    <a href="events.html" class="nav-link">Services</a>
+    <a href="about.html" class="nav-link">About</a>
+    <a href="contact.html" class="nav-link">Contact</a>
+    <div class="mobile-cta">
+      <a href="javascript:void(0)" onclick="openWhatsApp('Hi Manish! I want to discuss planning my upcoming event with Reviere Events.', event)" class="btn btn-whatsapp btn-full">
+        <i class="ri-whatsapp-line"></i> Chat on WhatsApp
+      </a>
+    </div>
+  </div>
+
+  <!-- ============ LUXURY HERO SECTION ============ -->
+  <section class="hero" id="home">
+    <div class="hero-bg">
+      <img src="assets/images/event-hero.jpg" alt="Luxury wedding event design by Reviere Events" fetchpriority="high" width="1920" height="1080">
+    </div>
+    <div class="hero-overlay"></div>
+    <div class="container hero-content">
+      <div class="hero-tag animate-on-scroll">
+        <i class="ri-star-fill text-gold"></i>
+        Luxury Event Planning & Management • Patna
+      </div>
+      <h1 class="hero-name animate-on-scroll">
+        REVIERE <span class="text-gold">EVENTS</span>
+      </h1>
+      <p class="hero-tagline animate-on-scroll">Crafting Unforgettable Moments</p>
+      <p class="hero-description animate-on-scroll">
+        Founded & Directed by Manish Kumar. Premium Event Planning & Management — Weddings, Corporate Events, Private Celebrations & Stage Performances tailored for Patna and beyond.
+      </p>
+      <div class="hero-buttons animate-on-scroll">
+        <a href="events.html" class="btn btn-primary">
+          <i class="ri-calendar-event-fill"></i> Explore Our Services
+        </a>
+        <a href="javascript:void(0)" onclick="openWhatsApp('Hi Manish! I visited Reviere Events website and would like to consult on an upcoming event.', event)" class="btn btn-outline">
+          <i class="ri-whatsapp-line"></i> Book via WhatsApp
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STATS BAR ============ -->
+  <section class="stats-bar">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item animate-on-scroll">
+          <h3 class="counter" data-target="50" data-suffix="+">0</h3>
+          <p>Events Managed</p>
+        </div>
+        <div class="stat-item animate-on-scroll">
+          <h3 class="counter" data-target="7" data-suffix="+">0</h3>
+          <p>Years Experience</p>
+        </div>
+        <div class="stat-item animate-on-scroll">
+          <h3 class="counter" data-target="150" data-suffix="+">0</h3>
+          <p>Happy Clients</p>
+        </div>
+        <div class="stat-item animate-on-scroll">
+          <h3 class="counter" data-target="100" data-suffix="%">0</h3>
+          <p>Customised Events</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CORE EVENT SERVICES (80%) ============ -->
+  <section class="section" id="services">
+    <div class="container">
+      <div class="section-header animate-on-scroll">
+        <div class="section-badge"><i class="ri-award-fill"></i> Our Specialisations</div>
+        <h2 class="section-title">Luxury Event Services</h2>
+        <p class="section-subtitle">From grand wedding galas to seamless corporate seminars, we bring elegance and flawless execution to every celebration.</p>
+      </div>
+
+      <div class="grid-3">
+        <!-- Service 1 -->
+        <div class="service-card animate-on-scroll">
+          <div class="service-card-icon">
+            <i class="ri-heart-3-fill"></i>
+          </div>
+          <h3 class="service-card-title">Wedding Planning</h3>
+          <p class="service-card-desc">Bespoke wedding design, ritual coordination, Sangeet choreography, and full hospitality management for your special day.</p>
+          <ul class="service-card-list">
+            <li><i class="ri-checkbox-circle-fill"></i> Sangeet & Reception Management</li>
+            <li><i class="ri-checkbox-circle-fill"></i> Theme Decoration & Lighting</li>
+            <li><i class="ri-checkbox-circle-fill"></i> Complete Guest Hospitality</li>
+          </ul>
+          <a href="javascript:void(0)" onclick="openWhatsApp('Hi Manish! I want to inquire about Wedding Planning services.', event)" class="btn btn-outline btn-full">
+            <i class="ri-whatsapp-line"></i> Inquire for Wedding
+          </a>
+        </div>
+
+        <!-- Service 2 -->
+        <div class="service-card animate-on-scroll">
+          <div class="service-card-icon">
+            <i class="ri-building-2-fill"></i>
+          </div>
+          <h3 class="service-card-title">Corporate Events</h3>
+          <p class="service-card-desc">High-impact corporate seminars, brand launches, annual galas, and executive conferences executed with absolute precision.</p>
+          <ul class="service-card-list">
+            <li><i class="ri-checkbox-circle-fill"></i> Stage Setup & AV Tech Support</li>
+            <li><i class="ri-checkbox-circle-fill"></i> VIP Hospitality & Logistics</li>
+            <li><i class="ri-checkbox-circle-fill"></i> Branding & Media Coverage</li>
+          </ul>
+          <a href="javascript:void(0)" onclick="openWhatsApp('Hi Manish! I want to inquire about Corporate Event Management.', event)" class="btn btn-outline btn-full">
+            <i class="ri-whatsapp-line"></i> Inquire for Corporate
+          </a>
+        </div>
+
+        <!-- Service 3 -->
+        <div class="service-card animate-on-scroll">
+          <div class="service-card-icon">
+            <i class="ri-cake-2-fill"></i>
+          </div>
+          <h3 class="service-card-title">Private Celebrations</h3>
+          <p class="service-card-desc">Milestone birthday bashes, anniversary galas, ring ceremonies, and exclusive private house parties.</p>
+          <ul class="service-card-list">
+            <li><i class="ri-checkbox-circle-fill"></i> Custom Decor & Ambience</li>
+            <li><i class="ri-checkbox-circle-fill"></i> DJ, Sound & Entertainment</li>
+            <li><i class="ri-checkbox-circle-fill"></i> Catering & Beverage Management</li>
+          </ul>
+          <a href="javascript:void(0)" onclick="openWhatsApp('Hi Manish! I want to inquire about Private Celebration planning.', event)" class="btn btn-outline btn-full">
+            <i class="ri-whatsapp-line"></i> Inquire for Party
+          </a>
+        </div>
+
+        <!-- Service 4 -->
+        <div class="service-card animate-on-scroll">
+          <div class="service-card-icon">
+            <i class="ri-rhythm-line"></i>
+          </div>
+          <h3 class="service-card-title">Stage Shows & Dance</h3>
+          <p class="service-card-desc">Electrifying live dance choreography, celebrity entry concepts, and choreographed stage shows directed by Manish Kumar.</p>
+          <ul class="service-card-list">
+            <li><i class="ri-checkbox-circle-fill"></i> Live Dance Performances</li>
+            <li><i class="ri-checkbox-circle-fill"></i> Family Sangeet Choreography</li>
+            <li><i class="ri-checkbox-circle-fill"></i> Concept Entries & Light FX</li>
+          </ul>
+          <a href="javascript:void(0)" onclick="openWhatsApp('Hi Manish! I want to inquire about Stage Dance Performances & Choreography.', event)" class="btn btn-outline btn-full">
+            <i class="ri-whatsapp-line"></i> Book Dance Show
+          </a>
+        </div>
+
+        <!-- Service 5 -->
+        <div class="service-card animate-on-scroll">
+          <div class="service-card-icon">
+            <i class="ri-sparkles-fill"></i>
+          </div>
+          <h3 class="service-card-title">College & Cultural Fests</h3>
+          <p class="service-card-desc">End-to-end festival management for colleges and institutions — artist booking, stage production, and crowd security.</p>
+          <ul class="service-card-list">
+            <li><i class="ri-checkbox-circle-fill"></i> Main Stage & Sound System</li>
+            <li><i class="ri-checkbox-circle-fill"></i> Celebrity & Artist Coordination</li>
+            <li><i class="ri-checkbox-circle-fill"></i> Security & Crowd Control</li>
+          </ul>
+          <a href="javascript:void(0)" onclick="openWhatsApp('Hi Manish! I want to inquire about College Fest management.', event)" class="btn btn-outline btn-full">
+            <i class="ri-whatsapp-line"></i> Inquire for Fest
+          </a>
+        </div>
+
+        <!-- Service 6 -->
+        <div class="service-card animate-on-scroll">
+          <div class="service-card-icon">
+            <i class="ri-flight-takeoff-fill"></i>
+          </div>
+          <h3 class="service-card-title">Destination Events</h3>
+          <p class="service-card-desc">Seamless outstation event management across Bihar and neighboring states with dedicated on-site venue logistics.</p>
+          <ul class="service-card-list">
+            <li><i class="ri-checkbox-circle-fill"></i> Venue Scouting & Selection</li>
+            <li><i class="ri-checkbox-circle-fill"></i> Guest Transport & Lodging</li>
+            <li><i class="ri-checkbox-circle-fill"></i> On-Ground Event Operations</li>
+          </ul>
+          <a href="javascript:void(0)" onclick="openWhatsApp('Hi Manish! I want to inquire about Destination Event planning.', event)" class="btn btn-outline btn-full">
+            <i class="ri-whatsapp-line"></i> Inquire for Destination
+          </a>
+        </div>
+
+        <!-- Service 7 -->
+        <div class="service-card animate-on-scroll">
+          <div class="service-card-icon">
+            <i class="ri-roadster-fill"></i>
+          </div>
+          <h3 class="service-card-title">Transportation Facility</h3>
+          <p class="service-card-desc">Luxury bridal cars, vintage vehicles, AC tempo travelers, and bus fleets for seamless guest logistics across Patna & Bihar.</p>
+          <ul class="service-card-list">
+            <li><i class="ri-checkbox-circle-fill"></i> Luxury Bridal Cars (Audi, BMW, Vintage)</li>
+            <li><i class="ri-checkbox-circle-fill"></i> AC Guest Buses & Airport Pickup Fleet</li>
+            <li><i class="ri-checkbox-circle-fill"></i> 24/7 On-Ground Transport Management</li>
+          </ul>
+          <a href="javascript:void(0)" onclick="openWhatsApp('Hi Manish! I want to inquire about Transportation & Fleet services for my event.', event)" class="btn btn-outline btn-full">
+            <i class="ri-whatsapp-line"></i> Inquire for Transport
+          </a>
+        </div>
+
+        <!-- Service 8 -->
+        <div class="service-card animate-on-scroll">
+          <div class="service-card-icon">
+            <i class="ri-shield-user-fill"></i>
+          </div>
+          <h3 class="service-card-title">Security & Bodyguards</h3>
+          <p class="service-card-desc">Elite personal bodyguards, trained bouncers, and comprehensive event checkpoint security for VIPs, galas, and weddings.</p>
+          <ul class="service-card-list">
+            <li><i class="ri-checkbox-circle-fill"></i> Trained Male & Female Event Bouncers</li>
+            <li><i class="ri-checkbox-circle-fill"></i> Armed & Unarmed Personal Bodyguards</li>
+            <li><i class="ri-checkbox-circle-fill"></i> Gate Metal Detectors & Crowd Discipline</li>
+          </ul>
+          <a href="javascript:void(0)" onclick="openWhatsApp('Hi Manish! I want to inquire about Security Guards & Bodyguard services for my event.', event)" class="btn btn-outline btn-full">
+            <i class="ri-whatsapp-line"></i> Inquire for Security
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ALL-IN-ONE VENDOR MANAGEMENT ============ -->
+  <section class="section section-dark" id="vendors">
+    <div class="container">
+      <div class="section-header animate-on-scroll">
+        <div class="section-badge"><i class="ri-shield-star-line"></i> Seamless Coordination</div>
+        <h2 class="section-title text-white">All-In-One Vendor Management</h2>
+        <p class="section-subtitle">Save time and eliminate stress. We manage Patna’s finest vendors under one unified contract.</p>
+      </div>
+
+      <div class="vendor-grid">
+        <div class="vendor-card animate-on-scroll">
+          <div class="vendor-icon"><i class="ri-magic-line"></i></div>
+          <h4 class="vendor-title">Beautician & Makeup</h4>
+          <p class="vendor-desc">Bridal, party & HD makeup artists</p>
+        </div>
+
+        <div class="vendor-card animate-on-scroll">
+          <div class="vendor-icon"><i class="ri-ancient-gate-line"></i></div>
+          <h4 class="vendor-title">Pandit & Rituals</h4>
+          <p class="vendor-desc">Experienced priests for all traditional ceremonies</p>
+        </div>
+
+        <div class="vendor-card animate-on-scroll">
+          <div class="vendor-icon"><i class="ri-camera-lens-line"></i></div>
+          <h4 class="vendor-title">Photographers</h4>
+          <p class="vendor-desc">Candid photography & cinematic portraits</p>
+        </div>
+
+        <div class="vendor-card animate-on-scroll">
+          <div class="vendor-icon"><i class="ri-video-line"></i></div>
+          <h4 class="vendor-title">Videographers</h4>
+          <p class="vendor-desc">4K drone shots & wedding films</p>
+        </div>
+
+        <div class="vendor-card animate-on-scroll">
+          <div class="vendor-icon"><i class="ri-palette-line"></i></div>
+          <h4 class="vendor-title">Stage & Decor</h4>
+          <p class="vendor-desc">Floral arrangements & luxury lighting</p>
+        </div>
+
+        <div class="vendor-card animate-on-scroll">
+          <div class="vendor-icon"><i class="ri-restaurant-line"></i></div>
+          <h4 class="vendor-title">Catering Services</h4>
+          <p class="vendor-desc">Multi-cuisine buffet & gourmet presentation</p>
+        </div>
+
+        <div class="vendor-card animate-on-scroll">
+          <div class="vendor-icon"><i class="ri-car-fill"></i></div>
+          <h4 class="vendor-title">Transportation Facility</h4>
+          <p class="vendor-desc">Bridal cars, guest AC buses & airport pickup</p>
+        </div>
+
+        <div class="vendor-card animate-on-scroll">
+          <div class="vendor-icon"><i class="ri-shield-user-line"></i></div>
+          <h4 class="vendor-title">Security & Bodyguards</h4>
+          <p class="vendor-desc">Trained bouncers, VIP bodyguards & gate control</p>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 2.5rem;" class="animate-on-scroll">
+        <a href="javascript:void(0)" onclick="openWhatsApp('Hi Manish! I want to consult on full vendor management for my event.', event)" class="btn btn-primary">
+          <i class="ri-whatsapp-line"></i> Consult Vendor Package
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURED EVENT GALLERY HIGHLIGHTS ============ -->
+  <section class="section" id="highlights">
+    <div class="container">
+      <div class="section-header animate-on-scroll">
+        <div class="section-badge"><i class="ri-gallery-fill"></i> Visual Excellence</div>
+        <h2 class="section-title">Featured Event Highlights</h2>
+        <p class="section-subtitle">A glimpse into recent luxury celebrations designed and executed by our team in Patna.</p>
+      </div>
+
+      <div class="grid-4">
+        <div class="highlight-card animate-on-scroll">
+          <img src="assets/images/event-hero.jpg" alt="Grand Wedding Decor" loading="lazy" width="600" height="400">
+          <div class="highlight-overlay">
+            <span class="highlight-tag">Wedding Gala</span>
+            <h4 class="highlight-title">Royal Palace Wedding</h4>
+          </div>
+        </div>
+
+        <div class="highlight-card animate-on-scroll">
+          <img src="assets/images/contemporary.jpg" alt="Stage Dance Show" loading="lazy" width="600" height="400">
+          <div class="highlight-overlay">
+            <span class="highlight-tag">Live Choreography</span>
+            <h4 class="highlight-title">Sangeet Stage Performance</h4>
+          </div>
+        </div>
+
+        <div class="highlight-card animate-on-scroll">
+          <img src="assets/images/salsa.jpg" alt="Corporate Gala" loading="lazy" width="600" height="400">
+          <div class="highlight-overlay">
+            <span class="highlight-tag">Corporate Event</span>
+            <h4 class="highlight-title">Annual Corporate Summit</h4>
+          </div>
+        </div>
+
+        <div class="highlight-card animate-on-scroll">
+          <img src="assets/images/bollyhop.jpg" alt="College Fest" loading="lazy" width="600" height="400">
+          <div class="highlight-overlay">
+            <span class="highlight-tag">Cultural Fest</span>
+            <h4 class="highlight-title">University Youth Festival</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CLIENT TESTIMONIALS ============ -->
+  <section class="section section-alt" id="testimonials">
+    <div class="container">
+      <div class="section-header animate-on-scroll">
+        <div class="section-badge"><i class="ri-star-smile-fill"></i> Client Trust</div>
+        <h2 class="section-title">What Our Clients Say</h2>
+        <p class="section-subtitle">Real feedback from event hosts and clients across Patna.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="testimonial-card animate-on-scroll">
+          <div class="testimonial-quote">"</div>
+          <div class="testimonial-stars">
+            <i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i>
+          </div>
+          <p class="testimonial-text">"We hired Manish for our college fest and he managed everything — from artist management to stage setup and security. Professional, creative, and strictly on time."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">AK</div>
+            <div>
+              <div class="testimonial-name">Amit Kumar</div>
+              <div class="testimonial-role">College Event Organiser</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card animate-on-scroll">
+          <div class="testimonial-quote">"</div>
+          <div class="testimonial-stars">
+            <i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i>
+          </div>
+          <p class="testimonial-text">"Our wedding Sangeet performance was choreographed by Manish sir, and his team also handled stage lighting. Every single guest complimented the arrangement!"</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">RP</div>
+            <div>
+              <div class="testimonial-name">Ravi Prakash</div>
+              <div class="testimonial-role">Wedding Client</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card animate-on-scroll">
+          <div class="testimonial-quote">"</div>
+          <div class="testimonial-stars">
+            <i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i>
+          </div>
+          <p class="testimonial-text">"Manish took care of catering, decor, and photography for my daughter's 1st birthday celebration. Seamless experience with zero stress for our family!"</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">SP</div>
+            <div>
+              <div class="testimonial-name">Sneha Patel</div>
+              <div class="testimonial-role">Private Party Host</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA BANNER ============ -->
+  <section class="cta-banner">
+    <div class="container">
+      <h2 class="animate-on-scroll">Ready to Plan Your Next Event?</h2>
+      <p class="animate-on-scroll">Let's discuss your vision, budget, and requirements. Chat with Manish Kumar directly on WhatsApp for an instant consultation.</p>
+      <div class="cta-buttons animate-on-scroll">
+        <a href="javascript:void(0)" onclick="openWhatsApp('Hi Manish! I want to start planning an upcoming event.', event)" class="btn btn-whatsapp btn-lg">
+          <i class="ri-whatsapp-line"></i> Chat on WhatsApp
+        </a>
+        <a href="contact.html" class="btn btn-outline btn-lg">
+          <i class="ri-mail-line"></i> Fill Inquiry Form
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="nav-logo" style="color:var(--white);">
+            <div class="nav-logo-monogram">RE</div>
+            REVIERE <span class="gold-accent">EVENTS</span>
+          </a>
+          <p>Exclusive Event Planning & Management founded and directed by Manish Kumar, based in Patna, Bihar. Turning moments into unforgettable memories with flawless execution.</p>
+          <div class="footer-social">
+            <a href="https://instagram.com/reviereevent" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ri-instagram-line"></i></a>
+            <a href="https://facebook.com/Reviere-Events" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ri-facebook-fill"></i></a>
+            <a href="https://youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="ri-youtube-line"></i></a>
+          </div>
+        </div>
+
+        <div class="footer-column">
+          <h4>Navigation</h4>
+          <a href="index.html">Home</a>
+          <a href="events.html">Services</a>
+          <a href="about.html">About Manish</a>
+          <a href="contact.html">Contact Us</a>
+        </div>
+
+        <div class="footer-column">
+          <h4>Services</h4>
+          <a href="events.html#wedding">Wedding Planning</a>
+          <a href="events.html#corporate">Corporate Events</a>
+          <a href="events.html#transportation">Transportation Facility</a>
+          <a href="events.html#security">Security & Bodyguards</a>
+          <a href="events.html#dance">Stage Shows & Dance</a>
+        </div>
+
+        <div class="footer-column">
+          <h4>Get in Touch</h4>
+          <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 0.45rem;">
+            <i class="ri-map-pin-line text-gold"></i> Patna, Bihar, India
+          </p>
+          <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 0.45rem;">
+            <i class="ri-phone-line text-gold"></i> <a href="tel:+918893535829" style="color:rgba(255,255,255,0.85);">+91 88935 35829</a>
+          </p>
+          <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 0.45rem;">
+            <i class="ri-phone-line text-gold"></i> <a href="tel:+917762908507" style="color:rgba(255,255,255,0.85);">+91 77629 08507</a>
+          </p>
+          <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 0.75rem;">
+            <i class="ri-mail-line text-gold"></i> <a href="mailto:reviereevent@gmail.com" style="color:rgba(255,255,255,0.85);">reviereevent@gmail.com</a>
+          </p>
+          <a href="javascript:void(0)" onclick="openWhatsApp('Hi Manish! I want to get in touch regarding an event.', event)" class="btn btn-whatsapp btn-sm" style="margin-top:0.5rem; width:100%; justify-content:center;">
+            <i class="ri-whatsapp-line"></i> Direct WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        © 2026 Reviere Events. All rights reserved. | Founded & Directed by Manish Kumar | Luxury Event Planner in Patna
+      </div>
+    </div>
+  </footer>
+
+  <!-- WhatsApp Floating FAB Button -->
+  <div class="whatsapp-fab">
+    <a href="javascript:void(0)" onclick="openWhatsApp('Hi Manish! I want to inquire about Event Planning & Management.', event)" class="whatsapp-fab-btn" aria-label="Chat on WhatsApp">
+      <i class="ri-whatsapp-line"></i>
+    </a>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

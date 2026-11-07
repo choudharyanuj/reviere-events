@@ -1,0 +1,14 @@
+---
+import { wa } from '../data/site';
+import BrandIcon from './BrandIcon.astro';
+---
+<button
+  type="button"
+  class="wa-fab group fixed right-4 bottom-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-ink text-ivory shadow-[0_18px_40px_-12px_rgb(20_17_13/0.55)] transition-colors duration-500 hover:bg-wa md:right-8 md:bottom-8 md:h-16 md:w-16"
+  aria-label="Chat on WhatsApp"
+  data-wa={wa.fab}
+  data-magnetic
+>
+  <BrandIcon name="whatsapp" class="h-6 w-6 md:h-7 md:w-7" />
+  <span class="absolute top-1 right-1 h-3 w-3 rounded-full bg-wa ring-2 ring-ivory group-hover:bg-ivory" aria-hidden="true"></span>
+</button>

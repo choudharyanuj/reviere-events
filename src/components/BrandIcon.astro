@@ -1,0 +1,8 @@
+---
+import { siWhatsapp, siInstagram, siFacebook } from 'simple-icons';
+
+interface Props { name: 'whatsapp' | 'instagram' | 'facebook'; class?: string }
+const { name, class: cls = 'h-5 w-5' } = Astro.props;
+const path = { whatsapp: siWhatsapp, instagram: siInstagram, facebook: siFacebook }[name].path;
+---
+<svg class={cls} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d={path} /></svg>

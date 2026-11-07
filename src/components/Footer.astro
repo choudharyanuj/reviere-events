@@ -1,0 +1,92 @@
+---
+import { site, footerNav, footerServices, wa } from '../data/site';
+import BrandIcon from './BrandIcon.astro';
+import Icon from './Icon.astro';
+import Monogram from './Monogram.astro';
+import { u } from '../lib/url';
+
+const word = 'Reviere'.split('');
+---
+<footer class="on-dark relative overflow-hidden bg-ink text-ivory" data-cursor-dark data-nav-dark>
+  <div class="shell pt-20 md:pt-28">
+    <div class="grid gap-14 md:grid-cols-12">
+      <div class="md:col-span-4">
+        <a href={u('/')} class="inline-flex items-center gap-3" aria-label="Reviere Events — Home">
+          <Monogram class="h-11 w-11 bg-ivory/5 text-[1.05rem]" />
+          <span class="flex flex-col leading-none">
+            <span class="font-serif text-2xl">REVIERE</span>
+            <span class="mt-1 text-[0.62rem] tracking-[0.42em] text-ivory/50">EVENTS</span>
+          </span>
+        </a>
+        <p class="mt-7 max-w-sm text-[0.95rem] leading-relaxed text-ivory/60">{site.footerAbout}</p>
+        <div class="mt-8 flex gap-3">
+          <a href={site.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="social" data-magnetic>
+            <BrandIcon name="instagram" class="h-[18px] w-[18px]" />
+          </a>
+          <a href={site.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="social" data-magnetic>
+            <BrandIcon name="facebook" class="h-[18px] w-[18px]" />
+          </a>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-10 md:col-span-8 md:grid-cols-3">
+        <div>
+          <h4 class="text-xs font-medium tracking-[0.22em] text-champagne uppercase">Navigation</h4>
+          <ul class="mt-6 space-y-3 text-[0.95rem] text-ivory/75">
+            {footerNav.map((l) => <li><a class="link-underline" href={u(l.href)}>{l.label}</a></li>)}
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-xs font-medium tracking-[0.22em] text-champagne uppercase">Services</h4>
+          <ul class="mt-6 space-y-3 text-[0.95rem] text-ivory/75">
+            {footerServices.map((l) => <li><a class="link-underline" href={u(l.href)}>{l.label}</a></li>)}
+          </ul>
+        </div>
+        <div class="col-span-2 md:col-span-1">
+          <h4 class="text-xs font-medium tracking-[0.22em] text-champagne uppercase">Get in Touch</h4>
+          <ul class="mt-6 space-y-3 text-[0.95rem] text-ivory/75">
+            <li class="flex items-center gap-2.5"><Icon name="MapPin" class="h-4 w-4 text-champagne/70" /> {site.location}</li>
+            <li class="flex items-center gap-2.5"><Icon name="Phone" class="h-4 w-4 text-champagne/70" /> <a class="link-underline" href={site.mainPhone.href}>{site.mainPhone.label}</a></li>
+            <li class="flex items-center gap-2.5"><Icon name="Phone" class="h-4 w-4 text-champagne/70" /> <a class="link-underline" href={site.altPhone.href}>{site.altPhone.label}</a></li>
+            <li class="flex items-center gap-2.5"><Icon name="Mail" class="h-4 w-4 text-champagne/70" /> <a class="link-underline" href={`mailto:${site.email}`}>{site.email}</a></li>
+          </ul>
+          <button type="button" class="btn btn-sm btn-light btn-wa mt-7" data-wa={wa.footer} data-magnetic>
+            <BrandIcon name="whatsapp" class="h-4 w-4" />
+            <span>Direct WhatsApp</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-word mt-20 select-none md:mt-24" aria-hidden="true">
+      {word.map((ch, i) => <span style={`--i:${i}`}>{ch}</span>)}
+    </div>
+
+    <div class="hairline"></div>
+    <div class="flex flex-col gap-4 py-7 text-[0.8rem] text-ivory/45 md:flex-row md:items-center md:justify-between">
+      <p>{site.copyright}</p>
+      <button type="button" class="group inline-flex items-center gap-2 self-start text-ivory/70 transition-colors hover:text-champagne md:self-auto" data-to-top>
+        Back to top
+        <Icon name="ArrowUp" class="h-4 w-4 transition-transform duration-500 group-hover:-translate-y-1" />
+      </button>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .social {
+    display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: 999px;
+    box-shadow: inset 0 0 0 1px rgb(244 239 230 / 0.18); color: rgb(244 239 230 / 0.8);
+    transition: background-color 0.5s var(--ease-expo), color 0.5s var(--ease-expo);
+  }
+  .social:hover { background: var(--color-champagne); color: var(--color-ink); }
+  .footer-word {
+    display: flex; justify-content: center; font-family: var(--font-serif);
+    font-size: clamp(6rem, 29vw, 30rem); line-height: 0.8; letter-spacing: -0.045em;
+    background: linear-gradient(180deg, rgb(220 195 143 / 0.9), rgb(220 195 143 / 0.05) 95%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .footer-word span { display: inline-block; transition: transform 0.9s var(--ease-expo); }
+  .footer-word:hover span { transform: translateY(calc(sin(var(--i) * 1.3) * 6%)); }
+  .footer-word span:hover { transform: translateY(-10%) !important; }
+</style>

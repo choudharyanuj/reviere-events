@@ -1,0 +1,191 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Split from '../components/Split.astro';
+import Icon from '../components/Icon.astro';
+import BrandIcon from '../components/BrandIcon.astro';
+import Monogram from '../components/Monogram.astro';
+import { contactPage, site } from '../data/site';
+
+const { hero, form, info, mapSrc } = contactPage;
+---
+<Base page="contact">
+  <PageHero title={hero.title} subtitle={hero.subtitle} crumb={hero.crumb} />
+
+  <section class="section pt-14 md:pt-20" id="contact">
+    <div class="shell grid gap-6 lg:grid-cols-12">
+      <!-- Inquiry form -->
+      <form id="contactForm" class="rounded-[2rem] bg-paper p-7 ring-1 ring-ink/[0.06] md:p-12 lg:col-span-7" novalidate data-inquiry>
+        <p class="eyebrow" data-reveal>{form.eyebrow}</p>
+        <Split as="h2" text={form.title} class="h2 mt-5" />
+        <p class="mt-5 max-w-lg text-stone" data-reveal>{form.intro}</p>
+
+        <div class="mt-10 grid gap-x-8 gap-y-4 md:grid-cols-2">
+          <div class="field">
+            <input id="name" name="name" type="text" placeholder={form.name.placeholder} required autocomplete="name" />
+            <label for="name">{form.name.label}</label>
+            <span class="bar" aria-hidden="true"></span>
+          </div>
+          <div class="field">
+            <input id="phone" name="phone" type="tel" inputmode="tel" placeholder={form.phone.placeholder} required autocomplete="tel" />
+            <label for="phone">{form.phone.label}</label>
+            <span class="bar" aria-hidden="true"></span>
+          </div>
+        </div>
+
+        <fieldset class="mt-10" data-event-type>
+          <legend class="text-[0.95rem] text-stone">{form.eventType.label}</legend>
+          <div class="mt-4 flex flex-wrap gap-2">
+            {
+              form.eventType.options.map((o) => (
+                <label class="cursor-pointer">
+                  <input type="radio" name="eventType" value={o} class="peer sr-only" required />
+                  <span class="chip select-none hover:bg-ink/5 peer-checked:bg-ink peer-checked:text-ivory peer-checked:shadow-none peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold">
+                    {o}
+                  </span>
+                </label>
+              ))
+            }
+          </div>
+        </fieldset>
+
+        <div class="mt-8 grid gap-x-8 gap-y-4 md:grid-cols-2">
+          <div class="field is-date">
+            <input id="eventDate" name="eventDate" type="date" />
+            <label for="eventDate">{form.date.label}</label>
+            <span class="bar" aria-hidden="true"></span>
+          </div>
+        </div>
+        <div class="field mt-4">
+          <textarea id="message" name="message" rows="4" placeholder={form.message.placeholder}></textarea>
+          <label for="message">{form.message.label}</label>
+          <span class="bar" aria-hidden="true"></span>
+        </div>
+
+        <button type="submit" class="btn btn-lg btn-wa btn-block mt-10" data-magnetic>
+          <BrandIcon name="whatsapp" class="h-5 w-5" />
+          <span>{form.submit}</span>
+        </button>
+        <p class="form-status mt-4 hidden items-center justify-center gap-2 text-sm text-wa" role="status" aria-live="polite" data-form-status>
+          <BrandIcon name="whatsapp" class="h-4 w-4" />
+          {form.status}
+        </p>
+      </form>
+
+      <!-- Live WhatsApp preview + contact details -->
+      <div class="grid content-start gap-6 lg:col-span-5">
+        <div class="wa-preview overflow-hidden rounded-[2rem] bg-ink text-ivory ring-1 ring-ink" data-reveal aria-hidden="true">
+          <div class="flex items-center gap-3 border-b border-ivory/10 px-5 py-4">
+            <Monogram class="h-10 w-10 bg-ivory/5 text-[0.95rem]" />
+            <div class="leading-tight">
+              <p class="text-[0.95rem] font-medium">{site.owner}</p>
+              <p class="text-xs text-ivory/50">{site.brand}</p>
+            </div>
+            <span class="ml-auto inline-flex items-center gap-1.5 text-[0.65rem] font-medium tracking-[0.18em] text-champagne uppercase">
+              <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-champagne"></span>Live preview
+            </span>
+          </div>
+          <div class="wa-chat min-h-[17rem] px-5 py-6">
+            <div class="ml-auto w-fit max-w-[92%] rounded-2xl rounded-tr-md bg-[#1d4a35] px-4 pt-3 pb-2 shadow-lg">
+              <p class="text-[0.9rem] leading-relaxed whitespace-pre-wrap text-ivory/95" data-wa-preview></p>
+              <p class="mt-1 flex items-center justify-end gap-1 text-[0.65rem] text-ivory/50">
+                <span data-wa-time>now</span>
+                <Icon name="CheckCheck" class="h-3.5 w-3.5 text-sky-300" stroke={2} />
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-[2rem] bg-paper p-7 ring-1 ring-ink/[0.06] md:p-9" data-reveal style="--d:120ms">
+          <h3 class="font-serif text-3xl">{info.title}</h3>
+          <ul class="mt-6 divide-y divide-ink/8">
+            <li class="flex gap-4 py-5">
+              <span class="info-icon"><Icon name="Phone" class="h-5 w-5" /></span>
+              <div class="min-w-0 flex-1">
+                <h4 class="text-xs font-medium tracking-[0.16em] text-stone uppercase">{info.main.title}</h4>
+                <p class="mt-1 flex items-center gap-2 text-lg">
+                  <a href={site.mainPhone.href} class="link-underline">{site.mainPhone.label}</a>
+                  <button type="button" class="copy-btn" data-copy={site.mainPhone.label} aria-label="Copy phone number"><Icon name="Copy" class="h-4 w-4" /></button>
+                </p>
+                <button type="button" class="mt-1 text-sm font-medium text-gold-deep link-underline" data-wa={info.main.wa}>{info.main.link}</button>
+              </div>
+            </li>
+            <li class="flex gap-4 py-5">
+              <span class="info-icon"><Icon name="PhoneCall" class="h-5 w-5" /></span>
+              <div class="min-w-0 flex-1">
+                <h4 class="text-xs font-medium tracking-[0.16em] text-stone uppercase">{info.alt.title}</h4>
+                <p class="mt-1 flex items-center gap-2 text-lg">
+                  <a href={site.altPhone.href} class="link-underline">{site.altPhone.label}</a>
+                  <button type="button" class="copy-btn" data-copy={site.altPhone.label} aria-label="Copy alternative phone number"><Icon name="Copy" class="h-4 w-4" /></button>
+                </p>
+                <p class="text-sm text-stone">{info.alt.note}</p>
+              </div>
+            </li>
+            <li class="flex gap-4 py-5">
+              <span class="info-icon"><Icon name="Mail" class="h-5 w-5" /></span>
+              <div class="min-w-0 flex-1">
+                <h4 class="text-xs font-medium tracking-[0.16em] text-stone uppercase">{info.email.title}</h4>
+                <p class="mt-1 flex items-center gap-2 text-lg">
+                  <a href={`mailto:${site.email}`} class="link-underline truncate">{site.email}</a>
+                  <button type="button" class="copy-btn" data-copy={site.email} aria-label="Copy email address"><Icon name="Copy" class="h-4 w-4" /></button>
+                </p>
+                <p class="text-sm text-stone">{info.email.note}</p>
+              </div>
+            </li>
+            <li class="flex gap-4 py-5">
+              <span class="info-icon"><Icon name="MapPin" class="h-5 w-5" /></span>
+              <div class="min-w-0 flex-1">
+                <h4 class="text-xs font-medium tracking-[0.16em] text-stone uppercase">{info.location.title}</h4>
+                <p class="mt-1 text-lg">{site.location}</p>
+                <p class="text-sm text-stone">{info.location.note}</p>
+              </div>
+            </li>
+            <li class="flex gap-4 py-5">
+              <span class="info-icon"><Icon name="Clock" class="h-5 w-5" /></span>
+              <div class="min-w-0 flex-1">
+                <h4 class="text-xs font-medium tracking-[0.16em] text-stone uppercase">{info.hours.title}</h4>
+                <p class="mt-1 text-lg">{info.hours.value}</p>
+              </div>
+            </li>
+          </ul>
+          <div class="mt-4 flex items-center justify-between border-t border-ink/8 pt-6">
+            <h4 class="text-sm font-medium">{info.follow}</h4>
+            <div class="flex gap-2">
+              <a href={site.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="copy-btn h-10 w-10"><BrandIcon name="instagram" class="h-[18px] w-[18px]" /></a>
+              <a href={site.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="copy-btn h-10 w-10"><BrandIcon name="facebook" class="h-[18px] w-[18px]" /></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="shell mt-6">
+      <div class="map overflow-hidden rounded-[2rem] ring-1 ring-ink/[0.06]" data-reveal>
+        <iframe
+          src={mapSrc}
+          title="Map of Patna, Bihar"
+          class="h-[22rem] w-full md:h-[28rem]"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </div>
+  </section>
+
+  <div class="toast pointer-events-none fixed bottom-24 left-1/2 z-50 rounded-full bg-ink px-5 py-3 text-sm text-ivory shadow-xl md:bottom-10" role="status" aria-live="polite" data-toast></div>
+</Base>
+
+<style>
+  .info-icon { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; flex-shrink: 0; border-radius: 0.9rem; background: var(--color-ink); color: var(--color-champagne); }
+  .copy-btn { display: inline-grid; place-items: center; width: 2rem; height: 2rem; border-radius: 999px; color: var(--color-stone); box-shadow: inset 0 0 0 1px rgb(20 17 13 / 0.12); transition: background-color 0.4s var(--ease-expo), color 0.4s var(--ease-expo); }
+  .copy-btn:hover { background: var(--color-ink); color: var(--color-ivory); }
+  .wa-chat { background: radial-gradient(circle at 1px 1px, rgb(244 239 230 / 0.06) 1px, transparent 0) 0 0 / 18px 18px; }
+  [data-wa-preview].is-typing::after { content: ''; display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -0.15em; background: var(--color-champagne); animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .map iframe { filter: grayscale(1) contrast(1.05) sepia(0.12); transition: filter 0.8s var(--ease-expo); }
+  .map:hover iframe { filter: none; }
+  .form-status.is-visible { display: flex; }
+  .toast { opacity: 0; transform: translate(-50%, 12px); transition: opacity 0.4s, transform 0.6s var(--ease-expo); }
+  .toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
+</style>

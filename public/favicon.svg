@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D4B475"/>
+      <stop offset="100%" stop-color="#A88644"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#0E0D0B"/>
+  <circle cx="32" cy="32" r="26" fill="none" stroke="url(#goldGrad)" stroke-width="2"/>
+  <circle cx="32" cy="32" r="23" fill="none" stroke="rgba(201,169,110,0.3)" stroke-width="1"/>
+  <text x="32" y="39" font-family="'Cormorant Garamond', Georgia, 'Times New Roman', serif" font-size="20" font-weight="700" fill="url(#goldGrad)" text-anchor="middle" letter-spacing="1.5">RE</text>
+</svg>

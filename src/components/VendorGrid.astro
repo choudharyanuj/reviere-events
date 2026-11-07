@@ -1,0 +1,43 @@
+---
+import SectionHead from './SectionHead.astro';
+import Icon from './Icon.astro';
+interface Props {
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  items: { icon: string; title: string; desc: string }[];
+  cta?: { label: string; wa: string };
+}
+const { eyebrow, title, subtitle, items, cta } = Astro.props;
+---
+<section class="on-dark section relative overflow-hidden bg-ink text-ivory" data-cursor-dark data-nav-dark>
+  <div class="shell">
+    <SectionHead eyebrow={eyebrow} title={title} subtitle={subtitle} />
+    <ul class="mt-12 grid grid-cols-2 gap-2.5 sm:gap-3 md:mt-16 lg:grid-cols-4" data-glow-group>
+      {
+        items.map((v, i) => (
+          <li class="glow-tile group flex min-h-[12.5rem] flex-col rounded-[1.4rem] bg-ivory/[0.025] p-4.5 sm:min-h-[15.5rem] sm:rounded-[1.75rem] sm:p-7 md:p-8" data-reveal style={`--d:${(i % 4) * 80}ms`}>
+            <div class="flex items-start justify-between">
+              <span class="grid h-10 w-10 place-items-center rounded-xl sm:h-12 sm:w-12 sm:rounded-2xl bg-champagne/10 text-champagne transition-transform duration-700 ease-(--ease-expo) group-hover:scale-110 group-hover:-rotate-6">
+                <Icon name={v.icon} class="h-[22px] w-[22px]" />
+              </span>
+              <span class="text-xs tracking-[0.2em] text-ivory/30">{String(i + 1).padStart(2, '0')}</span>
+            </div>
+            <h3 class="mt-auto pt-8 font-serif text-[1.3rem] leading-[1.1] sm:pt-10 sm:text-[1.7rem]">{v.title}</h3>
+            <p class="mt-2 text-[0.8rem] leading-relaxed text-ivory/55 sm:min-h-[3.2em] sm:text-[0.9rem]">{v.desc}</p>
+          </li>
+        ))
+      }
+    </ul>
+    {
+      cta && (
+        <div class="mt-14 flex justify-center" data-reveal>
+          <button type="button" class="btn btn-lg btn-light" data-wa={cta.wa} data-magnetic>
+            <span>{cta.label}</span>
+            <Icon name="ArrowUpRight" class="btn-icon" />
+          </button>
+        </div>
+      )
+    }
+  </div>
+</section>

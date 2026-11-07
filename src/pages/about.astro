@@ -1,0 +1,142 @@
+---
+import { Picture } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Split from '../components/Split.astro';
+import Timeline from '../components/Timeline.astro';
+import CtaBanner from '../components/CtaBanner.astro';
+import Icon from '../components/Icon.astro';
+import { aboutPage } from '../data/site';
+import portrait from '../assets/images/about-portrait.jpg';
+import contemporary from '../assets/images/contemporary.jpg';
+import bollyhop from '../assets/images/bollyhop.jpg';
+import salsa from '../assets/images/salsa.jpg';
+
+const { hero, bio, dance, quote, journey, cta } = aboutPage;
+// Which photo each dance style chip reveals (Bachata, a partner dance, shares the couple shot).
+const styleImage = [0, 1, 2, 2];
+const danceImages = [contemporary, bollyhop, salsa];
+const ringText = 'REVIERE EVENTS • PATNA, BIHAR • REVIERE EVENTS • PATNA, BIHAR • ';
+---
+<Base page="about">
+  <PageHero title={hero.title} subtitle={hero.subtitle} crumb={hero.crumb} />
+
+  <section class="section" id="bio">
+    <div class="shell grid gap-16 md:grid-cols-12 md:gap-10">
+      <div class="md:col-span-5">
+        <div class="relative md:sticky md:top-[calc(var(--nav-h)+2.5rem)] [perspective:1400px]" data-reveal="scale">
+          <div class="sheen relative aspect-[3/4] overflow-hidden rounded-[2rem] bg-sand" data-tilt="soft">
+            <Picture
+              src={portrait}
+              alt={bio.imageAlt}
+              formats={['avif', 'webp']}
+              widths={[420, 640, 896]}
+              sizes="(min-width: 768px) 40vw, 92vw"
+              class="h-full w-full object-cover"
+              loading="eager"
+              fetchpriority="high"
+            />
+          </div>
+          <div class="ring-badge absolute -right-3 -bottom-10 h-32 w-32 md:-right-10 md:h-40 md:w-40" aria-hidden="true" data-spin-on-scroll>
+            <svg viewBox="0 0 200 200" class="h-full w-full">
+              <defs><path id="ring-path" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0" /></defs>
+              <circle cx="100" cy="100" r="98" fill="#14110d" />
+              <text fill="#dcc38f" font-size="13.2" letter-spacing="3.1" font-family="Geist Variable, sans-serif" font-weight="500">
+                <textPath href="#ring-path">{ringText}</textPath>
+              </text>
+              <text x="100" y="114" text-anchor="middle" fill="#f4efe6" font-family="Instrument Serif, serif" font-size="44">RE</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="md:col-span-7 md:pl-10">
+        <p class="eyebrow" data-reveal>{bio.eyebrow}</p>
+        <Split as="h2" text={bio.title} class="h2 mt-6" />
+        <div class="mt-10 space-y-6 text-[1.0625rem] leading-[1.75] text-stone">
+          {
+            bio.paragraphs.map((p, i) => (
+              <p data-reveal style={`--d:${i * 80}ms`}>
+                {p.map(([t, em]) => (em ? <strong class="font-medium text-ink">{t}</strong> : t))}
+              </p>
+            ))
+          }
+        </div>
+
+        <ul class="mt-14 grid grid-cols-3 border-y border-ink/10">
+          {
+            bio.stats.map((s, i) => (
+              <li class:list={['py-8', i > 0 && 'border-l border-ink/10 pl-5 md:pl-8']} data-reveal style={`--d:${i * 90}ms`}>
+                <span class="block font-serif text-[clamp(2.75rem,5vw,4.5rem)] leading-none text-gold-deep">{s.value}</span>
+                <span class="mt-3 block text-[0.68rem] font-medium tracking-[0.18em] text-stone">{s.label}</span>
+              </li>
+            ))
+          }
+        </ul>
+
+        <div class="on-dark mt-14 grid overflow-hidden rounded-[2rem] bg-ink text-ivory md:grid-cols-5" data-reveal data-cursor-dark data-dance>
+          <div class="p-8 md:col-span-3 md:p-10">
+            <h3 class="font-serif text-[clamp(1.75rem,2.6vw,2.4rem)] leading-[1.05]">{dance.title}</h3>
+            <p class="mt-5 text-[0.98rem] leading-relaxed text-ivory/65">
+              {dance.paragraph.map(([t, em]) => (em ? <strong class="font-medium text-champagne">{t}</strong> : t))}
+            </p>
+            <div class="mt-8 flex flex-wrap gap-2" role="group" aria-label="Dance styles">
+              {
+                dance.styles.map((st, i) => (
+                  <button type="button" class="dance-chip chip text-ivory/80" aria-pressed={i === 0 ? 'true' : 'false'} data-dance-chip={styleImage[i]}>
+                    {st}
+                  </button>
+                ))
+              }
+            </div>
+          </div>
+          <div class="relative min-h-[18rem] md:col-span-2 md:min-h-0">
+            {
+              danceImages.map((img, i) => (
+                <Picture
+                  src={img}
+                  alt=""
+                  formats={['avif', 'webp']}
+                  widths={[360, 560]}
+                  sizes="(min-width: 768px) 22vw, 92vw"
+                  loading="lazy"
+                  class={`dance-img absolute inset-0 h-full w-full object-cover${i === 0 ? ' is-active' : ''}`}
+                  data-dance-img={i}
+                />
+              ))
+            }
+            <div class="absolute inset-0 bg-linear-to-r from-ink/60 to-transparent md:from-ink/70" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quote: words light up as you scroll, under stage lights -->
+  <section class="on-dark section relative isolate overflow-hidden bg-ink text-ivory" data-cursor-dark data-nav-dark data-spotlight>
+    <canvas class="absolute inset-0 -z-10 h-full w-full opacity-0 transition-opacity duration-[1400ms]" data-spotlight-canvas aria-hidden="true"></canvas>
+    <div class="shell py-10 text-center md:py-20">
+      <Icon name="Quote" class="mx-auto h-10 w-10 text-champagne" stroke={1} />
+      <blockquote class="mx-auto mt-10 max-w-[17ch] font-serif text-[clamp(2.4rem,6.4vw,6rem)] leading-[1.02] tracking-tight" data-scrub-words>
+        <span class="text-champagne">“</span>{quote.text.split(' ').map((w) => <span class="sw">{w} </span>)}<span class="text-champagne">”</span>
+      </blockquote>
+      <p class="mt-12 text-sm font-medium tracking-[0.24em] text-champagne uppercase" data-reveal>{quote.by}</p>
+    </div>
+  </section>
+
+  <Timeline eyebrow={journey.eyebrow} title={journey.title} subtitle={journey.subtitle} steps={journey.steps} alt />
+
+  <div class="h-6 md:h-12"></div>
+  <CtaBanner title={cta.title} text={cta.text} primary={cta.primary} secondary={cta.secondary} />
+  <div class="h-10 md:h-16"></div>
+</Base>
+
+<style>
+  .dance-chip { box-shadow: inset 0 0 0 1px rgb(244 239 230 / 0.2); }
+  .dance-chip:hover, .dance-chip[aria-pressed='true'] { background: var(--color-champagne); color: var(--color-ink); box-shadow: none; }
+  .dance-img { opacity: 0; scale: 1.08; transition: opacity 0.9s var(--ease-expo), scale 1.4s var(--ease-expo); }
+  .dance-img.is-active { opacity: 1; scale: 1; }
+  .sw { display: inline; white-space: pre-wrap; color: rgb(244 239 230 / 0.16); transition: color 0.4s; }
+  html:not(.js) .sw, .sw.is-lit { color: var(--color-ivory); }
+  .ring-badge svg { filter: drop-shadow(0 20px 30px rgb(20 17 13 / 0.35)); }
+</style>

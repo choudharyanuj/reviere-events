@@ -1,0 +1,39 @@
+---
+import Split from './Split.astro';
+import BrandIcon from './BrandIcon.astro';
+import Icon from './Icon.astro';
+import { u } from '../lib/url';
+interface Props {
+  title: string;
+  text: string;
+  primary: { label: string; wa: string };
+  secondary: { label: string; href: string };
+}
+const { title, text, primary, secondary } = Astro.props;
+---
+<section class="shell py-6 md:py-12">
+  <div class="on-dark relative isolate overflow-hidden rounded-[2rem] bg-ink px-6 py-24 text-center text-ivory md:rounded-[3rem] md:py-40" data-cursor-dark data-nav-dark data-spotlight>
+    <div class="spot-fallback absolute inset-0 -z-20" aria-hidden="true"></div>
+    <canvas class="absolute inset-0 -z-10 h-full w-full opacity-0 transition-opacity duration-[1400ms]" data-spotlight-canvas aria-hidden="true"></canvas>
+    <Split as="h2" text={title} class="h1 mx-auto max-w-[15ch]" />
+    <p class="lede mx-auto mt-8" data-reveal style="--d:200ms">{text}</p>
+    <div class="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row" data-reveal style="--d:320ms">
+      <button type="button" class="btn btn-lg btn-light btn-wa" data-wa={primary.wa} data-magnetic>
+        <BrandIcon name="whatsapp" class="h-5 w-5" />
+        <span>{primary.label}</span>
+      </button>
+      <a href={u(secondary.href)} class="btn btn-lg btn-ghost" data-magnetic>
+        <span>{secondary.label}</span>
+        <Icon name="ArrowRight" class="btn-icon no-rotate" />
+      </a>
+    </div>
+  </div>
+</section>
+<style>
+  .spot-fallback {
+    background:
+      radial-gradient(40% 70% at 30% -10%, rgb(220 195 143 / 0.22), transparent 70%),
+      radial-gradient(40% 70% at 70% -10%, rgb(220 195 143 / 0.16), transparent 70%),
+      radial-gradient(60% 30% at 50% 110%, rgb(225 154 46 / 0.12), transparent 70%);
+  }
+</style>

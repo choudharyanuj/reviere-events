@@ -1,0 +1,19 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { u } from '../lib/url';
+---
+<Base page="404">
+  <section class="relative isolate flex min-h-[100svh] items-center overflow-hidden" data-hero3d="page" data-cursor="Spin">
+    <div class="hero-glow absolute inset-0 -z-20" aria-hidden="true"></div>
+    <canvas class="absolute inset-0 -z-10 h-full w-full opacity-0 transition-opacity duration-[1600ms]" data-hero-canvas aria-hidden="true"></canvas>
+    <div class="shell">
+      <p class="eyebrow hero-fade">404</p>
+      <h1 class="h1 hero-fade mt-6 max-w-[12ch]" style="--d:120ms">This page isn’t on the guest list.</h1>
+      <a href={u('/')} class="btn btn-lg hero-fade mt-10" style="--d:260ms" data-magnetic>
+        <span>Home</span>
+        <Icon name="ArrowUpRight" class="btn-icon" />
+      </a>
+    </div>
+  </section>
+</Base>

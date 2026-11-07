@@ -1,0 +1,72 @@
+---
+import '../styles/global.css';
+import serifWoff2 from '@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2?url';
+import serifItalicWoff2 from '@fontsource/instrument-serif/files/instrument-serif-latin-400-italic.woff2?url';
+import sansWoff2 from '@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import WaFab from '../components/WaFab.astro';
+import Cursor from '../components/Cursor.astro';
+import { site, meta, jsonLd } from '../data/site';
+import { u, isPreview } from '../lib/url';
+
+type Page = keyof typeof meta;
+interface Props { page: Page | '404'; drawerWa?: string }
+const { page, drawerWa } = Astro.props;
+
+const m = page === '404'
+  ? { title: 'Page not found | Reviere Events', description: meta.home.description, ogTitle: meta.home.ogTitle, ogDescription: meta.home.ogDescription }
+  : meta[page];
+const keywords = 'keywords' in m ? m.keywords : undefined;
+const path = { home: '/', about: '/about.html', events: '/events.html', contact: '/contact.html', '404': '/' }[page];
+const canonical = new URL(path, site.url).href;
+const ogImage = new URL(site.ogImage, site.url).href;
+---
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{m.title}</title>
+    <meta name="description" content={m.description} />
+    {keywords && <meta name="keywords" content={keywords} />}
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#f4efe6" />
+    <link rel="icon" type="image/svg+xml" href={u('/favicon.svg')} />
+    <link rel="preload" as="font" type="font/woff2" href={serifWoff2} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={sansWoff2} crossorigin />
+    {page === 'home' && <link rel="preload" as="font" type="font/woff2" href={serifItalicWoff2} crossorigin />}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={m.ogTitle} />
+    <meta property="og:description" content={m.ogDescription} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonical} />
+    <meta name="twitter:title" content={m.ogTitle} />
+    <meta name="twitter:description" content={m.ogDescription} />
+    <meta name="twitter:image" content={ogImage} />
+    {(page === '404' || isPreview) && <meta name="robots" content="noindex, nofollow" />}
+
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      // If the app script never boots (very slow network, blocked JS), show everything rather than leave it hidden.
+      setTimeout(function () { if (!window.__rv) document.documentElement.classList.add('no-motion'); }, 3500);
+    </script>
+    {page === 'home' && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+  </head>
+  <body>
+    <a href="#main" class="fixed top-3 left-3 z-[60] -translate-y-24 rounded-full bg-ink px-4 py-2 text-sm text-ivory focus:translate-y-0">Skip to content</a>
+    <Nav current={page} drawerWa={drawerWa} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <WaFab />
+    <Cursor />
+    <script>
+      import '../scripts/app';
+    </script>
+  </body>
+</html>

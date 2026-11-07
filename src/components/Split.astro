@@ -1,0 +1,36 @@
+---
+/**
+ * Splits text into masked words that rise into place.
+ * `hero` plays on page load via CSS; otherwise it plays when scrolled into view (app.ts adds .is-in).
+ */
+interface Line { text: string; class?: string }
+interface Props {
+  text?: string;
+  lines?: (string | Line)[];
+  as?: string;
+  class?: string;
+  delay?: number;
+  hero?: boolean;
+  id?: string;
+}
+const { text, lines, as: Tag = 'span', class: cls, delay = 0, hero = false, id } = Astro.props;
+const ls: Line[] = (lines ?? [text ?? '']).map((l) => (typeof l === 'string' ? { text: l } : l));
+const label = ls.map((l) => l.text).join(' ');
+let i = 0;
+---
+<Tag class={cls} id={id} data-split={hero ? undefined : ''} aria-label={label} style={`--d:${delay}ms`}>
+  {
+    ls.map((l) => (
+      <span class:list={['split-line', l.class]} aria-hidden="true">
+        {l.text.split(' ').map((w, wi, arr) => (
+          <>
+            <span class="split-word">
+              <span class={hero ? 'hero-in' : undefined} style={`--i:${i++}`}>{w}</span>
+            </span>
+            {wi < arr.length - 1 ? ' ' : ''}
+          </>
+        ))}
+      </span>
+    ))
+  }
+</Tag>

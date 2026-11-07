@@ -1,0 +1,44 @@
+---
+import Split from './Split.astro';
+interface Props { eyebrow: string; title: string; subtitle: string; steps: { title: string; text: string }[]; alt?: boolean }
+const { eyebrow, title, subtitle, steps, alt = false } = Astro.props;
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+<section class:list={['section', alt && 'bg-paper']} data-timeline>
+  <div class="shell grid gap-16 md:grid-cols-12">
+    <div class="md:col-span-5">
+      <div class="md:sticky md:top-[calc(var(--nav-h)+3.5rem)]">
+        <p class="eyebrow" data-reveal>{eyebrow}</p>
+        <Split as="h2" text={title} class="h2 mt-6" />
+        <p class="lede mt-7" data-reveal style="--d:120ms">{subtitle}</p>
+        <div class="mt-14 hidden items-end gap-3 font-serif md:flex" aria-hidden="true" data-reveal style="--d:200ms">
+          <span class="relative block h-[7.5rem] overflow-hidden text-[7.5rem] leading-none">
+            <span class="block transition-transform duration-700 ease-(--ease-expo)" data-timeline-reel>
+              {steps.map((_, i) => <span class="block h-[7.5rem]">{pad(i + 1)}</span>)}
+            </span>
+          </span>
+          <span class="pb-4 text-2xl text-stone">/ {pad(steps.length)}</span>
+        </div>
+      </div>
+    </div>
+    <ol class="relative md:col-span-7 md:pt-4">
+      <span class="absolute top-3 bottom-3 left-[1.375rem] w-px bg-ink/12" aria-hidden="true">
+        <span class="absolute inset-0 origin-top scale-y-0 bg-gold" data-timeline-fill></span>
+      </span>
+      {
+        steps.map((s, i) => (
+          <li class="step relative pb-20 pl-20 last:pb-0" data-timeline-step data-reveal>
+            <span class="step-dot absolute top-0 left-0 grid h-11 w-11 place-items-center rounded-full bg-ivory font-serif text-lg ring-1 ring-ink/15 transition-[background-color,color,box-shadow] duration-700">
+              {i + 1}
+            </span>
+            <h3 class="h3 pt-1.5">{s.title}</h3>
+            <p class="mt-4 max-w-xl text-[1.0625rem] leading-relaxed text-stone">{s.text}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+<style>
+  .step.is-active .step-dot { background: var(--color-ink); color: var(--color-champagne); box-shadow: 0 0 0 6px rgb(176 138 69 / 0.15); }
+</style>
