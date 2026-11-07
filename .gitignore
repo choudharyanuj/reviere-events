@@ -4,3 +4,4 @@ dist/
 _tools/shots/
 .DS_Store
 dist-preview/
+_source/gen/
