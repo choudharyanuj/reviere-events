@@ -1,0 +1,5 @@
+# robots.txt for https://www.reviereevent.com/
+User-agent: *
+Allow: /
+
+Sitemap: https://www.reviereevent.com/sitemap.xml
