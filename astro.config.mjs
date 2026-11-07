@@ -8,6 +8,7 @@ const base = process.env.SITE_BASE || '/';
 export default defineConfig({
   site: process.env.SITE_URL || 'https://www.reviereevent.com',
   base,
+  outDir: process.env.OUT_DIR || './dist',
   // Keep the original URLs (/about.html, /events.html, /contact.html) so existing links keep working.
   build: { format: 'file', inlineStylesheets: 'always' },
   trailingSlash: 'ignore',

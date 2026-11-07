@@ -22,7 +22,7 @@ const { hero, stats, services, vendors, highlights, testimonials, cta } = home;
   <section class="relative isolate overflow-hidden" data-hero3d="home" data-cursor="Spin">
     <div class="hero-glow absolute inset-0 -z-20" aria-hidden="true"></div>
     <canvas class="absolute inset-0 -z-10 h-full w-full opacity-0 transition-opacity duration-[1800ms]" data-hero-canvas aria-hidden="true"></canvas>
-    <div class="shell flex min-h-[100svh] flex-col justify-end pt-[calc(var(--nav-h)+3rem)] pb-8 md:pb-12">
+    <div class="shell flex min-h-[100svh] flex-col justify-end pt-[calc(var(--nav-h)+3rem)] pb-8 md:pt-[calc(var(--nav-h)+1.5rem)] md:pb-10">
       <p class="eyebrow hero-fade max-w-[19rem] sm:max-w-none" style="--d:150ms">{hero.eyebrow}</p>
       <Split
         hero
@@ -30,12 +30,12 @@ const { hero, stats, services, vendors, highlights, testimonials, cta } = home;
         class="h-display mt-6 md:mt-8"
         lines={[{ text: hero.title[0] }, { text: hero.title[1], class: 'italic text-gold pl-[0.55em] md:pl-[1.4em]' }]}
       />
-      <div class="mt-7 grid gap-7 md:mt-14 md:grid-cols-12 md:items-end">
-        <div class="md:col-span-6 lg:col-span-5">
-          <p class="hero-fade font-serif text-[2rem] leading-tight italic md:text-[2.6rem]" style="--d:520ms">{hero.tagline}</p>
+      <div class="mt-7 grid gap-7 md:mt-[min(3.5rem,4svh)] md:grid-cols-12 md:items-end">
+        <div class="md:col-span-6">
+          <p class="hero-fade font-serif text-[2rem] leading-tight italic md:text-[clamp(1.8rem,min(3vw,5svh),2.6rem)]" style="--d:520ms">{hero.tagline}</p>
           <p class="hero-fade mt-4 max-w-md text-[0.98rem] leading-relaxed text-stone" style="--d:620ms">{hero.description}</p>
         </div>
-        <div class="hero-fade flex flex-col gap-3 sm:flex-row md:col-span-6 md:justify-end lg:col-span-7" style="--d:740ms">
+        <div class="hero-fade flex flex-col gap-3 sm:flex-row md:col-span-6 md:justify-end" style="--d:740ms">
           <a href={u(hero.primary.href)} class="btn btn-lg" data-magnetic>
             <span>{hero.primary.label}</span>
             <Icon name="ArrowUpRight" class="btn-icon" />
@@ -46,7 +46,7 @@ const { hero, stats, services, vendors, highlights, testimonials, cta } = home;
           </button>
         </div>
       </div>
-      <div class="hero-fade mt-12 flex items-center justify-between pr-16 text-[0.7rem] md:pr-24 font-medium tracking-[0.22em] text-stone uppercase md:mt-16" style="--d:950ms">
+      <div class="hero-fade mt-10 flex items-center justify-between pr-16 text-[0.7rem] font-medium tracking-[0.22em] text-stone uppercase md:mt-[min(3.5rem,4.5svh)] md:pr-24" style="--d:950ms">
         <span class="flex items-center gap-3"><span class="scroll-cue" aria-hidden="true"></span>Scroll</span>
         <span class="hidden items-center gap-2 sm:flex" data-hero-hint><Icon name="Hand" class="h-4 w-4" />Drag to spin · Tap for petals</span>
       </div>

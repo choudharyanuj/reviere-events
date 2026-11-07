@@ -25,7 +25,7 @@
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-quart: cubic-bezier(0.25, 1, 0.5, 1);
 
-  --text-display: clamp(4.25rem, 15.5vw, 15rem);
+  --text-display: clamp(4.25rem, min(15.5vw, 23svh), 15rem);
   --text-h1: clamp(3rem, 8vw, 7.5rem);
   --text-h2: clamp(2.5rem, 5.6vw, 5.25rem);
   --text-h3: clamp(1.6rem, 2.6vw, 2.25rem);
@@ -236,7 +236,7 @@ html.js [data-split].is-in .split-word > span { transform: none; }
 }
 .cursor-label { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-ivory); opacity: 0; transition: opacity 0.3s; }
 .cursor.is-hover .cursor-ring { width: 4rem; height: 4rem; margin: -2rem 0 0 -2rem; background: rgb(176 138 69 / 0.12); box-shadow: inset 0 0 0 1px rgb(176 138 69 / 0.6); }
-.cursor.has-label .cursor-ring { width: 5.5rem; height: 5.5rem; margin: -2.75rem 0 0 -2.75rem; background: var(--color-ink); box-shadow: none; }
+.cursor.has-label .cursor-ring { width: 4.5rem; height: 4.5rem; margin: -2.25rem 0 0 -2.25rem; background: var(--color-ink); box-shadow: none; }
 .cursor.has-label .cursor-label { opacity: 1; }
 .cursor.on-dark .cursor-ring { box-shadow: inset 0 0 0 1px rgb(244 239 230 / 0.45); }
 .cursor.on-dark.has-label .cursor-ring { background: var(--color-champagne); }

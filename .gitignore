@@ -3,3 +3,4 @@ dist/
 .astro/
 _tools/shots/
 .DS_Store
+dist-preview/
