@@ -274,6 +274,7 @@ export function mountHero(section: HTMLElement, canvas: HTMLCanvasElement, { var
   };
   const onDown = (e: PointerEvent) => {
     if (isUi(e.target) || e.button > 0) return;
+    if (e.pointerType === 'mouse') e.preventDefault(); // dragging to spin must not select the hero text
     dragging = true;
     travel = 0;
     downX = lastX = e.clientX;

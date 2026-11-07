@@ -124,6 +124,9 @@ with sync_playwright() as p:
         pg.wait_for_timeout(5000)
         ops = pg.evaluate("[...document.querySelectorAll('[data-hero-canvas]')].map(c => +getComputedStyle(c).opacity)")
         check(f'3d {path}: hero canvas faded in', bool(ops) and ops[0] > 0.5, str(ops))
+        if path == '/':
+            pg.mouse.move(1000, 450); pg.mouse.down(); pg.mouse.move(400, 420, steps=10); pg.mouse.up()
+            check('3d /: dragging to spin the rings selects no text', not pg.evaluate('getSelection().toString()').strip())
         check(f'3d {path}: no JS errors', not errs, ' | '.join(errs))
         ctx.close()
     b.close()
