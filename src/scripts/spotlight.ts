@@ -46,16 +46,16 @@ void main() {
     float sweep = sin(t * 0.33 + fi * 2.2) * 0.22;
     float ang = (1.0 - fi) * 0.32 + sweep + uAim.x * (0.42 - abs(fi - 1.0) * 0.12);
     float b = beam(uv, src, ang, 0.15 + 0.03 * sin(t * 0.5 + fi));
-    vec3 c = mix(vec3(0.88, 0.78, 0.58), vec3(0.9, 0.62, 0.26), fi * 0.45);
-    col += c * b * (0.3 + 0.7 * haze) * 0.5;
+    vec3 c = fi < 0.5 ? vec3(1.0, 0.24, 0.5) : (fi < 1.5 ? vec3(0.55, 0.36, 0.96) : vec3(1.0, 0.55, 0.2));
+    col += c * b * (0.3 + 0.7 * haze) * 0.55;
   }
   float cx = aspect * (0.5 + uAim.x * 0.18);
-  col += vec3(0.86, 0.7, 0.45) * exp(-pow((uv.y - 0.0) * 5.0, 2.0)) * exp(-pow((uv.x - cx) / aspect * 2.4, 2.0)) * 0.22;
+  col += vec3(1.0, 0.36, 0.45) * exp(-pow((uv.y - 0.0) * 5.0, 2.0)) * exp(-pow((uv.x - cx) / aspect * 2.4, 2.0)) * 0.22;
   vec2 g = uv * 70.0;
   vec2 id = floor(g);
   float h = hash(id);
   float sparkle = step(0.986, h) * smoothstep(0.45, 0.0, length(fract(g) - 0.5)) * (0.5 + 0.5 * sin(t * 2.0 + h * 50.0));
-  col += sparkle * vec3(1.0, 0.92, 0.75) * clamp(col.r * 4.0, 0.0, 1.0);
+  col += sparkle * vec3(1.0, 0.9, 0.95) * clamp((col.r + col.b) * 3.0, 0.0, 1.0);
   col *= uOn;
   o = vec4(col, clamp(max(col.r, max(col.g, col.b)), 0.0, 1.0));
 }`;

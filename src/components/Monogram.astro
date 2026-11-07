@@ -2,7 +2,12 @@
 interface Props { class?: string }
 const { class: cls = 'h-10 w-10' } = Astro.props;
 ---
-<span class:list={['relative grid shrink-0 place-items-center rounded-full bg-ink text-champagne', cls]} aria-hidden="true">
-  <span class="absolute inset-[3px] rounded-full ring-1 ring-champagne/50"></span>
-  <span class="font-serif text-[0.95em] leading-none tracking-tight">RE</span>
+<span class:list={['relative grid shrink-0 place-items-center overflow-hidden rounded-full', cls]} aria-hidden="true">
+  <span class="mono-ring absolute -inset-1/2"></span>
+  <span class="absolute inset-[1.5px] rounded-full bg-bg"></span>
+  <span class="relative font-display text-[0.92em] font-semibold tracking-tight">RE</span>
 </span>
+<style>
+  .mono-ring { background: conic-gradient(from 0deg, var(--color-pink), var(--color-orange), var(--color-amber), var(--color-violet), var(--color-pink)); animation: mono-spin 9s linear infinite; }
+  @keyframes mono-spin { to { transform: rotate(360deg); } }
+</style>

@@ -9,29 +9,22 @@ const { current, drawerWa = wa.drawer } = Astro.props;
 ---
 <header class="site-nav fixed inset-x-0 top-0 z-50" data-nav>
   <div class="shell">
-    <div
-      class="nav-bar mt-3 flex h-[60px] items-center justify-between rounded-full pr-2 pl-2.5 transition-[background-color,box-shadow,backdrop-filter] duration-700 ease-(--ease-expo)"
-      data-nav-bar
-    >
+    <div class="nav-bar mt-3 flex h-[60px] items-center justify-between rounded-full pr-2 pl-2.5 transition-[background-color,box-shadow,backdrop-filter] duration-700 ease-(--ease-expo)" data-nav-bar>
       <a href={u('/')} class="group flex items-center gap-3" aria-label="Reviere Events — Home">
-        <Monogram class="h-10 w-10 text-[1rem] transition-transform duration-700 ease-(--ease-expo) group-hover:rotate-[-12deg]" />
-        <span class="brand-word flex flex-col leading-none">
-          <span class="font-serif text-[1.4rem] tracking-tight">REVIERE</span>
-          <span class="mt-0.5 text-[0.6rem] font-medium tracking-[0.42em] opacity-60">EVENTS</span>
+        <Monogram class="h-10 w-10 text-[0.95rem] transition-transform duration-700 ease-(--ease-expo) group-hover:scale-110" />
+        <span class="flex flex-col leading-none">
+          <span class="font-display text-[1.15rem] font-semibold tracking-tight">REVIERE</span>
+          <span class="mt-1 font-mono text-[0.58rem] tracking-[0.38em] text-muted">EVENTS</span>
         </span>
       </a>
 
       <nav class="hidden md:block" aria-label="Primary">
         <ul class="relative flex items-center gap-1 rounded-full p-1" data-nav-links>
-          <li aria-hidden="true" class="nav-pill pointer-events-none absolute top-1 left-0 h-[calc(100%-0.5rem)] rounded-full bg-ink opacity-0" data-nav-pill></li>
+          <li aria-hidden="true" class="nav-pill pointer-events-none absolute top-1 left-0 h-[calc(100%-0.5rem)] rounded-full bg-fg opacity-0" data-nav-pill></li>
           {
             nav.map((n) => (
               <li class="relative">
-                <a
-                  href={u(n.href)}
-                  class="nav-link relative z-10 block rounded-full px-4 py-2 text-[0.9rem] font-medium transition-colors duration-500"
-                  aria-current={current === n.key ? 'page' : undefined}
-                >
+                <a href={u(n.href)} class="nav-link relative z-10 block rounded-full px-4 py-2 text-[0.9rem] font-medium transition-colors duration-500" aria-current={current === n.key ? 'page' : undefined}>
                   {n.label}
                 </a>
               </li>
@@ -45,14 +38,7 @@ const { current, drawerWa = wa.drawer } = Astro.props;
           <BrandIcon name="whatsapp" class="h-4 w-4" />
           <span>WhatsApp</span>
         </button>
-        <button
-          type="button"
-          class="menu-toggle relative grid h-11 w-11 place-items-center rounded-full bg-ink text-ivory md:hidden"
-          aria-label="Open menu"
-          aria-expanded="false"
-          aria-controls="mobile-drawer"
-          data-menu-toggle
-        >
+        <button type="button" class="menu-toggle relative grid h-11 w-11 place-items-center rounded-full bg-fg text-bg md:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-drawer" data-menu-toggle>
           <span class="menu-line absolute h-px w-4 bg-current transition-transform duration-500 ease-(--ease-expo)" style="transform: translateY(-3px)"></span>
           <span class="menu-line absolute h-px w-4 bg-current transition-transform duration-500 ease-(--ease-expo)" style="transform: translateY(3px)"></span>
         </button>
@@ -61,16 +47,17 @@ const { current, drawerWa = wa.drawer } = Astro.props;
   </div>
 </header>
 
-<div id="mobile-drawer" class="drawer fixed inset-0 z-40 bg-ivory md:hidden" data-drawer aria-hidden="true" inert>
-  <div class="shell flex h-full flex-col pt-28 pb-10">
+<div id="mobile-drawer" class="drawer fixed inset-0 z-40 bg-bg md:hidden" data-drawer aria-hidden="true" inert>
+  <div class="aurora absolute inset-0 opacity-70" aria-hidden="true"></div>
+  <div class="shell relative flex h-full flex-col pt-28 pb-10">
     <nav aria-label="Mobile">
       <ul class="flex flex-col">
         {
           nav.map((n, i) => (
-            <li class="drawer-item overflow-hidden border-b border-ink/10" style={`--i:${i}`}>
+            <li class="drawer-item overflow-hidden border-b border-white/10" style={`--i:${i}`}>
               <a href={u(n.href)} class="flex items-baseline justify-between py-4" aria-current={current === n.key ? 'page' : undefined}>
-                <span class="font-serif text-[3.25rem] leading-none tracking-tight">{n.label}</span>
-                <span class="text-xs tracking-[0.2em] text-stone">0{i + 1}</span>
+                <span class="font-display text-[3rem] leading-none font-semibold tracking-tight uppercase">{n.label}</span>
+                <span class="font-mono text-xs text-muted">0{i + 1}</span>
               </a>
             </li>
           ))
@@ -78,11 +65,11 @@ const { current, drawerWa = wa.drawer } = Astro.props;
       </ul>
     </nav>
     <div class="drawer-item mt-auto space-y-5" style="--i:5">
-      <button type="button" class="btn btn-wa btn-lg btn-block" data-wa={drawerWa}>
+      <button type="button" class="btn btn-grad btn-lg btn-block" data-wa={drawerWa}>
         <BrandIcon name="whatsapp" class="h-5 w-5" />
         <span>Chat on WhatsApp</span>
       </button>
-      <div class="flex items-center justify-between text-sm text-stone">
+      <div class="flex items-center justify-between font-mono text-xs text-muted">
         <a href={site.mainPhone.href}>{site.mainPhone.label}</a>
         <a href={`mailto:${site.email}`}>{site.email}</a>
       </div>
@@ -91,26 +78,16 @@ const { current, drawerWa = wa.drawer } = Astro.props;
 </div>
 
 <style>
-  .nav-link { color: var(--color-ink); }
-  .nav-link.is-pill { color: var(--color-ivory); }
+  .nav-link { color: var(--color-fg); }
+  .nav-link.is-pill { color: #0a0a0a; }
   [data-nav].is-scrolled .nav-bar,
   [data-nav].is-solid .nav-bar {
-    background: color-mix(in oklab, var(--color-paper) 72%, transparent);
-    backdrop-filter: blur(18px) saturate(1.4);
-    -webkit-backdrop-filter: blur(18px) saturate(1.4);
-    box-shadow: 0 1px 0 rgb(20 17 13 / 0.06), 0 12px 40px -18px rgb(20 17 13 / 0.25);
+    background: rgb(17 17 23 / 0.62);
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08), 0 16px 40px -20px rgb(0 0 0 / 0.8);
   }
-  [data-nav].is-scrolled.over-dark:not(.is-solid) .nav-bar {
-    background: color-mix(in oklab, var(--color-ink-2) 78%, transparent);
-    box-shadow: 0 0 0 1px rgb(244 239 230 / 0.08), 0 12px 40px -18px rgb(0 0 0 / 0.6);
-  }
-  [data-nav].over-dark:not(.is-solid) .brand-word,
-  [data-nav].over-dark:not(.is-solid) .nav-link:not(.is-pill) { color: var(--color-ivory); }
-  [data-nav].over-dark:not(.is-solid) .nav-pill { background: var(--color-champagne); }
-  [data-nav].over-dark:not(.is-solid) .nav-link.is-pill { color: var(--color-ink); }
-  [data-nav].over-dark:not(.is-solid) .menu-toggle { background: var(--color-ivory); color: var(--color-ink); }
-  .brand-word { transition: color 0.5s var(--ease-expo); }
-  .nav-pill { transition: background-color 0.5s var(--ease-expo),  transform 0.6s var(--ease-expo), width 0.6s var(--ease-expo), opacity 0.4s; }
+  .nav-pill { transition: transform 0.6s var(--ease-expo), width 0.6s var(--ease-expo), opacity 0.4s; }
 
   .drawer { clip-path: inset(0 0 100% 0); transition: clip-path 0.9s var(--ease-expo); visibility: hidden; }
   .drawer.is-open { clip-path: inset(0 0 0 0); visibility: visible; }

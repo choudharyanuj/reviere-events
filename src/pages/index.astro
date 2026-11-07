@@ -9,34 +9,27 @@ import Icon from '../components/Icon.astro';
 import BrandIcon from '../components/BrandIcon.astro';
 import { home } from '../data/site';
 import { u } from '../lib/url';
-import eventHero from '../assets/images/event-hero.jpg';
-import contemporary from '../assets/images/contemporary.jpg';
-import salsa from '../assets/images/salsa.jpg';
-import bollyhop from '../assets/images/bollyhop.jpg';
+import { scenes, type SceneKey } from '../lib/images';
 
-const images = { eventHero, contemporary, salsa, bollyhop } as const;
 const { hero, stats, services, vendors, highlights, testimonials, cta } = home;
+const img = (k: string) => scenes[k as SceneKey];
 ---
 <Base page="home">
   <!-- ───────── Hero ───────── -->
   <section class="relative isolate overflow-hidden" data-hero3d="home" data-cursor="Spin">
-    <div class="hero-glow absolute inset-0 -z-20" aria-hidden="true"></div>
+    <div class="aurora absolute inset-0 -z-20" aria-hidden="true"></div>
+    <div class="hero-beams absolute inset-0 -z-20" aria-hidden="true"></div>
     <canvas class="absolute inset-0 -z-10 h-full w-full opacity-0 transition-opacity duration-[1800ms]" data-hero-canvas aria-hidden="true"></canvas>
     <div class="shell flex min-h-[100svh] flex-col justify-end pt-[calc(var(--nav-h)+3rem)] pb-8 md:pt-[calc(var(--nav-h)+1.5rem)] md:pb-10">
       <p class="eyebrow hero-fade max-w-[19rem] sm:max-w-none" style="--d:150ms">{hero.eyebrow}</p>
-      <Split
-        hero
-        as="h1"
-        class="h-display mt-6 md:mt-8"
-        lines={[{ text: hero.title[0] }, { text: hero.title[1], class: 'italic text-gold pl-[0.55em] md:pl-[1.4em]' }]}
-      />
+      <Split hero as="h1" class="h-display mt-6 md:mt-8" lines={[{ text: hero.title[0] }, { text: hero.title[1], class: 'text-grad pl-[0.5em] md:pl-[1.2em]' }]} />
       <div class="mt-7 grid gap-7 md:mt-[min(3.5rem,4svh)] md:grid-cols-12 md:items-end">
         <div class="md:col-span-6">
-          <p class="hero-fade font-serif text-[2rem] leading-tight italic md:text-[clamp(1.8rem,min(3vw,5svh),2.6rem)]" style="--d:520ms">{hero.tagline}</p>
-          <p class="hero-fade mt-4 max-w-md text-[0.98rem] leading-relaxed text-stone" style="--d:620ms">{hero.description}</p>
+          <p class="hero-fade font-display text-[1.75rem] leading-tight font-medium tracking-tight md:text-[clamp(1.6rem,min(2.6vw,4.5svh),2.4rem)]" style="--d:520ms">{hero.tagline}</p>
+          <p class="hero-fade mt-4 max-w-md text-[0.98rem] leading-relaxed text-muted" style="--d:620ms">{hero.description}</p>
         </div>
         <div class="hero-fade flex flex-col gap-3 sm:flex-row md:col-span-6 md:justify-end" style="--d:740ms">
-          <a href={u(hero.primary.href)} class="btn btn-lg" data-magnetic>
+          <a href={u(hero.primary.href)} class="btn btn-lg btn-grad" data-magnetic>
             <span>{hero.primary.label}</span>
             <Icon name="ArrowUpRight" class="btn-icon" />
           </a>
@@ -46,31 +39,42 @@ const { hero, stats, services, vendors, highlights, testimonials, cta } = home;
           </button>
         </div>
       </div>
-      <div class="hero-fade mt-10 flex items-center justify-between pr-16 text-[0.7rem] font-medium tracking-[0.22em] text-stone uppercase md:mt-[min(3.5rem,4.5svh)] md:pr-24" style="--d:950ms">
+      <div class="hero-fade mt-10 flex items-center justify-between pr-16 font-mono text-[0.68rem] tracking-[0.16em] text-muted uppercase md:mt-[min(3.5rem,4.5svh)] md:pr-24" style="--d:950ms">
         <span class="flex items-center gap-3"><span class="scroll-cue" aria-hidden="true"></span>Scroll</span>
         <span class="hidden items-center gap-2 sm:flex" data-hero-hint><Icon name="Hand" class="h-4 w-4" />Drag to spin · Tap for petals</span>
       </div>
     </div>
   </section>
 
+  <!-- ───────── Service ticker ───────── -->
+  <svg width="0" height="0" class="absolute" aria-hidden="true"><defs><linearGradient id="spark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff3d81" /><stop offset=".55" stop-color="#ff7a2f" /><stop offset="1" stop-color="#ffc247" /></linearGradient></defs></svg>
+  <section class="relative overflow-hidden border-y border-white/[0.07] py-6 md:py-9" aria-label="Our services">
+    <div class="marquee-skew" data-marquee>
+      <div class="flex w-max animate-marquee hover:[animation-play-state:paused]">
+        {
+          [0, 1].map((k) => (
+            <ul class="flex shrink-0 items-center" aria-hidden={k === 1 ? 'true' : undefined}>
+              {services.items.map((s, i) => (
+                <li class="flex items-center">
+                  <span class:list={['marquee-word px-5 font-display text-[clamp(2rem,5.4vw,5rem)] leading-none font-semibold tracking-tight uppercase md:px-9', i % 2 === 1 && 'is-outline']}>{s.title}</span>
+                  <svg class="h-[clamp(1.1rem,2.4vw,2.2rem)] w-[clamp(1.1rem,2.4vw,2.2rem)] shrink-0" viewBox="0 0 24 24" aria-hidden="true"><path fill="url(#spark)" d="M12 0c.6 6.4 5.6 11.4 12 12-6.4.6-11.4 5.6-12 12-.6-6.4-5.6-11.4-12-12C6.4 11.4 11.4 6.4 12 0Z" /></svg>
+                </li>
+              ))}
+            </ul>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
   <!-- ───────── Stats ───────── -->
   <section class="shell" aria-label="Reviere Events in numbers">
-    <div class="hairline"></div>
     <ul class="grid grid-cols-2 md:grid-cols-4">
       {
         stats.map((s, i) => (
-          <li
-            class:list={[
-              'px-1 py-10 md:px-8 md:py-14',
-              i % 2 === 1 && 'border-l border-ink/10 pl-6',
-              i >= 2 && 'border-t border-ink/10 md:border-t-0',
-              i === 2 && 'md:border-l md:pl-8',
-            ]}
-            data-reveal
-            style={`--d:${i * 90}ms`}
-          >
-            <span class="block font-serif text-[clamp(3.75rem,7.5vw,7rem)] leading-none tracking-tight tabular-nums" data-counter={s.value}>{s.value}</span>
-            <span class="mt-3 block text-sm text-stone">{s.label}</span>
+          <li class:list={['stat group px-1 py-10 md:px-8 md:py-16', i % 2 === 1 && 'border-l border-white/[0.07] pl-6', i >= 2 && 'border-t border-white/[0.07] md:border-t-0', i === 2 && 'md:border-l md:pl-8']} data-reveal style={`--d:${i * 90}ms`}>
+            <span class="block font-display text-[clamp(3.75rem,7.5vw,7rem)] leading-none font-semibold tracking-tight tabular-nums transition-colors duration-500 group-hover:text-orange" data-counter={s.value}>{s.value}</span>
+            <span class="mt-3 block font-mono text-[0.72rem] tracking-[0.12em] text-muted uppercase">{s.label}</span>
           </li>
         ))
       }
@@ -78,29 +82,22 @@ const { hero, stats, services, vendors, highlights, testimonials, cta } = home;
     <div class="hairline"></div>
   </section>
 
-  <!-- ───────── Services (interactive index) ───────── -->
+  <!-- ───────── Services (interactive index with cursor-following previews) ───────── -->
   <section class="section" id="services">
     <div class="shell">
       <SectionHead eyebrow={services.eyebrow} title={services.title} subtitle={services.subtitle} />
-      <ul class="mt-16 border-t border-ink/10 md:mt-20" data-accordion>
+      <ul class="mt-16 border-t border-white/[0.08] md:mt-20" data-accordion>
         {
           services.items.map((s, i) => (
-            <li class:list={['svc border-b border-ink/10', i === 0 && 'is-open']} data-reveal>
+            <li class:list={['svc border-b border-white/[0.08]', i === 0 && 'is-open']} data-reveal data-svc={i}>
               <h3>
-                <button
-                  type="button"
-                  class="svc-head group flex w-full items-center gap-4 py-6 text-left md:gap-8 md:py-8"
-                  aria-expanded={i === 0 ? 'true' : 'false'}
-                  aria-controls={`svc-${i}`}
-                  id={`svc-h-${i}`}
-                  data-acc-trigger
-                >
-                  <span class="svc-num w-8 shrink-0 text-xs tracking-[0.2em] text-stone tabular-nums transition-colors duration-500 md:w-12">{String(i + 1).padStart(2, '0')}</span>
-                  <span class="svc-title flex-1 font-serif text-[clamp(1.9rem,4.4vw,4.25rem)] leading-[1.02] tracking-tight transition-transform duration-700 ease-(--ease-expo)">{s.title}</span>
-                  <span class="svc-icon hidden h-14 w-14 shrink-0 place-items-center rounded-full ring-1 ring-ink/15 transition-[background-color,color,transform] duration-700 ease-(--ease-expo) md:grid">
+                <button type="button" class="svc-head group flex w-full items-center gap-4 py-6 text-left md:gap-8 md:py-8" aria-expanded={i === 0 ? 'true' : 'false'} aria-controls={`svc-${i}`} id={`svc-h-${i}`} data-acc-trigger>
+                  <span class="svc-num w-8 shrink-0 font-mono text-xs text-faint tabular-nums transition-colors duration-500 md:w-12">{String(i + 1).padStart(2, '0')}</span>
+                  <span class="svc-title flex-1 font-display text-[clamp(1.8rem,4.2vw,4rem)] leading-[1] font-semibold tracking-tight uppercase transition-[transform,opacity,color] duration-700 ease-(--ease-expo)">{s.title}</span>
+                  <span class="svc-icon hidden h-14 w-14 shrink-0 place-items-center rounded-full ring-1 ring-white/15 transition-[background,color,transform] duration-700 ease-(--ease-expo) md:grid">
                     <Icon name={s.icon} class="h-[22px] w-[22px]" />
                   </span>
-                  <span class="svc-plus relative grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ink text-ivory" aria-hidden="true">
+                  <span class="svc-plus relative grid h-11 w-11 shrink-0 place-items-center rounded-full bg-fg text-bg" aria-hidden="true">
                     <span class="absolute h-px w-4 bg-current"></span>
                     <span class="svc-plus-v absolute h-4 w-px bg-current transition-transform duration-500 ease-(--ease-expo)"></span>
                   </span>
@@ -109,11 +106,12 @@ const { hero, stats, services, vendors, highlights, testimonials, cta } = home;
               <div id={`svc-${i}`} class="svc-body grid" role="region" aria-labelledby={`svc-h-${i}`}>
                 <div class="overflow-hidden">
                   <div class="grid gap-8 pb-10 md:grid-cols-12 md:pb-12 md:pl-20">
-                    <p class="text-lg leading-relaxed text-stone md:col-span-5">{s.desc}</p>
+                    <Picture src={img(s.image)} alt="" formats={['avif', 'webp']} widths={[480, 800]} sizes="92vw" loading="lazy" class="aspect-[16/10] w-full rounded-2xl object-cover md:hidden" />
+                    <p class="text-lg leading-relaxed text-muted md:col-span-5">{s.desc}</p>
                     <ul class="space-y-3 md:col-span-4">
                       {s.points.map((p) => (
                         <li class="flex items-start gap-3 text-[0.98rem]">
-                          <Icon name="Check" class="mt-1 h-4 w-4 shrink-0 text-gold" stroke={2} />
+                          <Icon name="Check" class="mt-1 h-4 w-4 shrink-0 text-orange" stroke={2} />
                           {p}
                         </li>
                       ))}
@@ -132,16 +130,17 @@ const { hero, stats, services, vendors, highlights, testimonials, cta } = home;
         }
       </ul>
     </div>
+    <div class="svc-preview pointer-events-none fixed top-0 left-0 z-30 hidden h-[15rem] w-[22rem] overflow-hidden rounded-2xl opacity-0 md:block" data-svc-preview aria-hidden="true">
+      {
+        services.items.map((s, i) => (
+          <Picture src={img(s.image)} alt="" formats={['avif', 'webp']} widths={[480, 720]} sizes="22rem" loading="lazy" class="svc-preview-img absolute inset-0 h-full w-full object-cover opacity-0" data-svc-img={i} />
+        ))
+      }
+    </div>
   </section>
 
   <!-- ───────── Vendors ───────── -->
-  <VendorGrid
-    eyebrow={vendors.eyebrow}
-    title={vendors.title}
-    subtitle={vendors.subtitle}
-    items={vendors.items}
-    cta={{ label: vendors.cta, wa: vendors.wa }}
-  />
+  <VendorGrid eyebrow={vendors.eyebrow} title={vendors.title} subtitle={vendors.subtitle} items={vendors.items} cta={{ label: vendors.cta, wa: vendors.wa }} />
 
   <!-- ───────── Highlights (drag gallery) ───────── -->
   <section class="section overflow-hidden" id="highlights" data-gallery>
@@ -155,28 +154,21 @@ const { hero, stats, services, vendors, highlights, testimonials, cta } = home;
     <div class="no-scrollbar mt-8 flex snap-x snap-mandatory scroll-px-(--gutter) gap-4 overflow-x-auto px-(--gutter) md:gap-6" data-gal-track data-cursor="Drag" tabindex="0" aria-label="Featured event highlights">
       {
         highlights.items.map((h, i) => (
-          <figure
-            class:list={[
-              'gal-card group relative h-[min(70svh,620px)] shrink-0 snap-start overflow-hidden rounded-[1.75rem] bg-sand',
-              i === 0 ? 'w-[86vw] md:w-[62vw] lg:w-[50vw]' : 'w-[74vw] sm:w-[46vw] lg:w-[29vw]',
-            ]}
-            data-reveal
-            style={`--d:${i * 90}ms`}
-          >
+          <figure class:list={['gal-card group relative h-[min(70svh,620px)] shrink-0 snap-start overflow-hidden rounded-[1.75rem] bg-card', i === 0 ? 'w-[86vw] md:w-[62vw] lg:w-[50vw]' : 'w-[74vw] sm:w-[46vw] lg:w-[29vw]']} data-reveal style={`--d:${i * 90}ms`}>
             <Picture
-              src={images[h.image as keyof typeof images]}
+              src={img(h.image)}
               alt={h.alt}
               formats={['avif', 'webp']}
-              widths={i === 0 ? [640, 960, 1376] : [480, 720, 896]}
+              widths={i === 0 ? [640, 1024, 1536] : [480, 720, 1024]}
               sizes={i === 0 ? '(min-width: 1024px) 50vw, (min-width: 768px) 62vw, 86vw' : '(min-width: 1024px) 29vw, (min-width: 640px) 46vw, 74vw'}
               loading="lazy"
               class="gal-img absolute inset-0 h-full w-[115%] max-w-none object-cover"
               draggable="false"
             />
-            <div class="absolute inset-0 bg-linear-to-t from-ink/80 via-ink/10 to-transparent" aria-hidden="true"></div>
-            <figcaption class="absolute inset-x-0 bottom-0 p-6 text-ivory md:p-8">
-              <span class="chip bg-ivory/12 text-ivory shadow-none backdrop-blur-md">{h.tag}</span>
-              <h3 class="mt-4 font-serif text-[2rem] leading-none transition-transform duration-700 ease-(--ease-expo) group-hover:-translate-y-1 md:text-[2.6rem]">{h.title}</h3>
+            <div class="absolute inset-0 bg-linear-to-t from-bg/90 via-bg/10 to-transparent" aria-hidden="true"></div>
+            <figcaption class="absolute inset-x-0 bottom-0 p-6 md:p-8">
+              <span class="chip glass font-mono text-[0.68rem] tracking-[0.12em] uppercase">{h.tag}</span>
+              <h3 class="mt-4 font-display text-[1.9rem] leading-[0.95] font-semibold tracking-tight uppercase transition-transform duration-700 ease-(--ease-expo) group-hover:-translate-y-1 md:text-[2.4rem]">{h.title}</h3>
             </figcaption>
           </figure>
         ))
@@ -184,14 +176,14 @@ const { hero, stats, services, vendors, highlights, testimonials, cta } = home;
       <div class="w-px shrink-0" aria-hidden="true"></div>
     </div>
     <div class="shell mt-8">
-      <div class="relative h-px bg-ink/10" aria-hidden="true">
-        <div class="absolute inset-y-0 left-0 w-full origin-left bg-ink" style="transform: scaleX(0.25)" data-gal-progress></div>
+      <div class="relative h-px bg-white/10" aria-hidden="true">
+        <div class="absolute inset-y-0 left-0 w-1/4" style="background: var(--grad)" data-gal-progress></div>
       </div>
     </div>
   </section>
 
   <!-- ───────── Testimonials ───────── -->
-  <section class="section bg-paper" id="testimonials">
+  <section class="section bg-bg-2" id="testimonials">
     <div class="shell">
       <SectionHead eyebrow={testimonials.eyebrow} title={testimonials.title} subtitle={testimonials.subtitle} />
       <div class="mt-16 grid gap-12 md:mt-20 md:grid-cols-12" data-testimonials>
@@ -199,18 +191,16 @@ const { hero, stats, services, vendors, highlights, testimonials, cta } = home;
           {
             testimonials.items.map((t, i) => (
               <figure class:list={['t-slide col-start-1 row-start-1', i === 0 && 'is-active']} data-t-slide aria-hidden={i === 0 ? 'false' : 'true'}>
-                <blockquote class="font-serif text-[clamp(1.85rem,3.6vw,3.5rem)] leading-[1.1] tracking-tight">
-                  <span class="text-gold">“</span>
-                  {t.quote.split(' ').map((w, wi) => (
-                    <span class="tw" style={`--i:${wi}`}>{w} </span>
-                  ))}
-                  <span class="text-gold">”</span>
+                <blockquote class="font-display text-[clamp(1.7rem,3.3vw,3.1rem)] leading-[1.12] font-medium tracking-tight">
+                  <span class="text-grad">“</span>
+                  {t.quote.split(' ').map((w, wi) => <span class="tw" style={`--i:${wi}`}>{w} </span>)}
+                  <span class="text-grad">”</span>
                 </blockquote>
                 <figcaption class="t-meta mt-10 flex items-center gap-4">
-                  <span class="grid h-12 w-12 place-items-center rounded-full bg-ink font-serif text-lg text-champagne">{t.initials}</span>
+                  <span class="grid h-12 w-12 place-items-center rounded-full font-mono text-sm font-semibold text-bg" style="background: var(--grad)">{t.initials}</span>
                   <span>
                     <span class="block font-medium">{t.name}</span>
-                    <span class="block text-sm text-stone">{t.role}</span>
+                    <span class="block font-mono text-xs text-muted">{t.role}</span>
                   </span>
                 </figcaption>
               </figure>
@@ -220,19 +210,13 @@ const { hero, stats, services, vendors, highlights, testimonials, cta } = home;
         <div class="flex gap-2 md:col-span-4 md:flex-col md:justify-end lg:col-span-3" role="tablist" aria-label="Client testimonials">
           {
             testimonials.items.map((t, i) => (
-              <button
-                type="button"
-                role="tab"
-                aria-selected={i === 0 ? 'true' : 'false'}
-                class="t-tab relative flex flex-1 items-center gap-3 overflow-hidden rounded-2xl p-3 text-left ring-1 ring-ink/10 transition-[background-color,box-shadow] duration-500 md:flex-none"
-                data-t-tab={i}
-              >
-                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-ink/5 font-serif">{t.initials}</span>
+              <button type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} class="t-tab relative flex flex-1 items-center gap-3 overflow-hidden rounded-2xl p-3 text-left ring-1 ring-white/10 transition-[background,box-shadow] duration-500 md:flex-none" data-t-tab={i}>
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/[0.06] font-mono text-xs">{t.initials}</span>
                 <span class="hidden min-w-0 sm:block">
                   <span class="block truncate text-sm font-medium">{t.name}</span>
-                  <span class="block truncate text-xs text-stone">{t.role}</span>
+                  <span class="block truncate font-mono text-[0.68rem] text-muted">{t.role}</span>
                 </span>
-                <span class="t-progress absolute bottom-0 left-0 h-[2px] w-full origin-left scale-x-0 bg-gold" aria-hidden="true"></span>
+                <span class="t-progress absolute bottom-0 left-0 h-[2px] w-full origin-left scale-x-0" style="background: var(--grad)" aria-hidden="true"></span>
               </button>
             ))
           }
@@ -241,35 +225,49 @@ const { hero, stats, services, vendors, highlights, testimonials, cta } = home;
     </div>
   </section>
 
+  <div class="h-6 md:h-12"></div>
   <CtaBanner title={cta.title} text={cta.text} primary={cta.primary} secondary={cta.secondary} />
   <div class="h-10 md:h-16"></div>
 </Base>
 
 <style>
-  .scroll-cue { position: relative; width: 1px; height: 2.25rem; background: rgb(20 17 13 / 0.15); overflow: hidden; }
-  .scroll-cue::after { content: ''; position: absolute; inset: 0; background: var(--color-ink); animation: cue 2.2s var(--ease-expo) infinite; }
+  .hero-beams {
+    background:
+      conic-gradient(from 168deg at 70% -10%, transparent 0deg, rgb(255 61 129 / 0.10) 8deg, transparent 18deg),
+      conic-gradient(from 186deg at 30% -10%, transparent 0deg, rgb(139 92 246 / 0.10) 7deg, transparent 16deg);
+    mask-image: linear-gradient(to bottom, #000 0%, transparent 85%);
+  }
+  .scroll-cue { position: relative; width: 1px; height: 2.25rem; background: rgb(255 255 255 / 0.15); overflow: hidden; }
+  .scroll-cue::after { content: ''; position: absolute; inset: 0; background: var(--grad); animation: cue 2.2s var(--ease-expo) infinite; }
   @keyframes cue { 0% { transform: translateY(-100%); } 60%, 100% { transform: translateY(100%); } }
+
+  /* Ticker */
+  .marquee-word.is-outline { color: transparent; -webkit-text-stroke: 1px rgb(255 255 255 / 0.45); }
+  .marquee-word { transition: color 0.4s; }
+  .marquee-word:hover { color: var(--color-orange); -webkit-text-stroke: 0; }
 
   /* Services index */
   .svc-body { grid-template-rows: 0fr; transition: grid-template-rows 0.9s var(--ease-expo); }
   html:not(.js) .svc-body, .svc.is-open .svc-body { grid-template-rows: 1fr; }
   .svc-head[aria-expanded='true'] .svc-plus-v { transform: rotate(90deg); }
-  .svc-head[aria-expanded='true'] .svc-num { color: var(--color-gold-deep); }
-  .svc-head[aria-expanded='true'] .svc-icon { background: var(--color-ink); color: var(--color-champagne); }
+  .svc-head[aria-expanded='true'] .svc-num { color: var(--color-orange); }
+  .svc-head[aria-expanded='true'] .svc-icon { background: var(--grad); color: #0a0a0a; }
   @media (hover: hover) {
     .svc-head:hover .svc-title { transform: translateX(1rem); }
     .svc-head:hover .svc-icon { transform: rotate(-14deg) scale(1.06); }
-    [data-accordion]:has(.svc-head:hover) .svc:not(:has(.svc-head:hover)) .svc-title { opacity: 0.35; }
+    [data-accordion]:has(.svc-head:hover) .svc:not(:has(.svc-head:hover)) .svc-title { opacity: 0.28; }
   }
-  .svc-title { transition-property: transform, opacity; }
+  .svc-preview { box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.9), inset 0 0 0 1px rgb(255 255 255 / 0.1); }
+  .svc-preview-img { transition: opacity 0.5s var(--ease-expo), scale 0.8s var(--ease-expo); scale: 1.12; }
+  .svc-preview-img.is-active { opacity: 1; scale: 1; }
 
   /* Gallery */
-  .gal-btn { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 999px; box-shadow: inset 0 0 0 1px rgb(20 17 13 / 0.18); transition: background-color 0.5s var(--ease-expo), color 0.5s var(--ease-expo); }
-  .gal-btn:hover { background: var(--color-ink); color: var(--color-ivory); }
+  .gal-btn { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 999px; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16); transition: background 0.5s var(--ease-expo), color 0.5s var(--ease-expo); }
+  .gal-btn:hover { background: var(--color-fg); color: #0a0a0a; }
   [data-gal-track].is-dragging { scroll-snap-type: none; cursor: grabbing; }
   [data-gal-track].is-dragging * { pointer-events: none; }
   .gal-img { transform: translateX(var(--px, -6%)); transition: scale 1.4s var(--ease-expo); }
-  .gal-card:hover .gal-img { scale: 1.04; }
+  .gal-card:hover .gal-img { scale: 1.05; }
 
   /* Testimonials */
   .t-slide { visibility: hidden; }
@@ -280,5 +278,5 @@ const { hero, stats, services, vendors, highlights, testimonials, cta } = home;
   .t-slide.is-active .t-meta { opacity: 1; transform: none; transition-delay: 0.45s; }
   html:not(.js) .t-slide { visibility: visible; position: static; }
   html:not(.js) .t-slide .tw, html:not(.js) .t-slide .t-meta { opacity: 1; filter: none; transform: none; }
-  .t-tab[aria-selected='true'] { background: var(--color-ivory); box-shadow: inset 0 0 0 1px rgb(20 17 13 / 0.18), 0 12px 30px -18px rgb(20 17 13 / 0.35); }
+  .t-tab[aria-selected='true'] { background: rgb(255 255 255 / 0.06); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.18); }
 </style>

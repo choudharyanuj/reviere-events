@@ -119,8 +119,10 @@ with sync_playwright() as p:
     r.scroll(2.6, 900, drift=(-200, 80))                           # fly through the ring, counters
     r.hold(0.6)
     r.scroll(1.6, 620)                                            # services index
+    rows = [r.center_of('[data-acc-trigger]', k) for k in (1, 2, 3, 4)]
+    r.path(3.2, [(W * 0.35, rows[0][1]), (W * 0.42, rows[1][1]), (W * 0.36, rows[2][1]), (W * 0.45, rows[3][1])])  # previews follow the cursor
     head = r.center_of('[data-acc-trigger]', 3)
-    r.hold(0.9, move_to=head)                                     # hover dims the others
+    r.hold(0.7, move_to=head)
     r.click_at(*head); r.hold(1.6)                                # open "Stage Shows & Dance"
     r.scroll(2.4, 1150)                                           # into the vendor grid
     r.path(2.4, [(W * 0.2, H * 0.62), (W * 0.45, H * 0.7), (W * 0.7, H * 0.58), (W * 0.88, H * 0.72)])  # glow borders follow

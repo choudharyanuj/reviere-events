@@ -81,17 +81,7 @@ if (!reduced) {
 
 /* ───────── Navigation ───────── */
 const navEl = $('[data-nav]');
-// The bar turns dark while it floats over a dark section, so it never reads as a grey smear.
-let navTick = 0;
-const onScroll = () => {
-  if (navTick) return;
-  navTick = requestAnimationFrame(() => {
-    navTick = 0;
-    navEl?.classList.toggle('is-scrolled', scrollY > 40);
-    const under = document.elementsFromPoint(innerWidth / 2, 40).find((el) => !navEl?.contains(el));
-    navEl?.classList.toggle('over-dark', !!under?.closest('[data-nav-dark]'));
-  });
-};
+const onScroll = () => navEl?.classList.toggle('is-scrolled', scrollY > 40);
 addEventListener('scroll', onScroll, { passive: true });
 onScroll();
 
@@ -205,7 +195,6 @@ if (fine && !reduced) {
         cursor.classList.toggle('is-hover', !!interactive);
         cursor.classList.toggle('has-label', !!lab);
         if (lab && label.textContent !== lab) label.textContent = lab;
-        cursor.classList.toggle('on-dark', !!t.closest('[data-cursor-dark]'));
         cursor.classList.remove('is-hidden');
       },
       { passive: true },
@@ -249,6 +238,64 @@ $$('[data-accordion]').forEach((acc) => {
     });
   });
 });
+
+/* ───────── Services: image preview that follows the cursor (mouse only) ───────── */
+const preview = $('[data-svc-preview]');
+const accordion = $('[data-accordion]');
+if (preview && accordion && fine && !reduced) {
+  // Only start downloading the preview images once the list is close to the viewport.
+  preview.style.display = 'none';
+  const near = new IntersectionObserver(([en]) => {
+    if (!en.isIntersecting) return;
+    preview.style.display = '';
+    near.disconnect();
+  }, { rootMargin: '600px 0px' });
+  near.observe(accordion);
+
+  const imgs = $$('[data-svc-img]', preview);
+  gsap.set(preview, { scale: 0.85 });
+  const xTo = gsap.quickTo(preview, 'x', { duration: 0.7, ease: 'power3' });
+  const yTo = gsap.quickTo(preview, 'y', { duration: 0.7, ease: 'power3' });
+  const rTo = gsap.quickTo(preview, 'rotation', { duration: 0.9, ease: 'power3' });
+  let current = -1, shown = false, lastX = 0;
+  const hide = () => {
+    if (!shown) return;
+    shown = false;
+    current = -1;
+    gsap.to(preview, { opacity: 0, scale: 0.85, duration: 0.4, ease: 'power3.out' });
+  };
+  accordion.addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse') return;
+    const t = e.target as Element;
+    const row = t.closest<HTMLElement>('[data-svc]');
+    if (!row || !t.closest('.svc-head')) return hide();
+    const i = row.dataset.svc!;
+    if (i !== String(current)) {
+      imgs.forEach((im) => im.classList.toggle('is-active', im.dataset.svcImg === i));
+      current = Number(i);
+    }
+    const x = Math.min(innerWidth - preview.offsetWidth - 16, e.clientX + 36);
+    const y = e.clientY - preview.offsetHeight / 2;
+    if (!shown) {
+      gsap.set(preview, { x, y });
+      gsap.to(preview, { opacity: 1, scale: 1, duration: 0.5, ease: 'power3.out' });
+      shown = true;
+    }
+    xTo(x);
+    yTo(y);
+    rTo(Math.max(-9, Math.min(9, (e.clientX - lastX) * 0.6)));
+    lastX = e.clientX;
+  });
+  accordion.addEventListener('pointerleave', hide);
+  addEventListener('scroll', hide, { passive: true });
+}
+
+/* ───────── Ticker leans into the scroll direction ───────── */
+const marquee = $('[data-marquee]');
+if (marquee && lenis) {
+  const skewTo = gsap.quickTo(marquee, 'skewX', { duration: 0.6, ease: 'power3' });
+  lenis.on('scroll', (l: Lenis) => skewTo(Math.max(-14, Math.min(14, l.velocity * -0.4))));
+}
 
 /* ───────── Highlights gallery: drag, inertia, arrows, parallax ───────── */
 const gallery = $('[data-gallery]');

@@ -19,18 +19,21 @@ import {
   Vector3,
   Vector4,
   MathUtils,
+  SphereGeometry,
+  MeshBasicMaterial,
+  BackSide,
+  Color,
 } from 'three';
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
 type Options = { variant: 'home' | 'page'; reduced: boolean };
 
 // Petal palette in sRGB (the shader writes these straight to the screen)
 const PETALS: [string, number][] = [
-  ['#e19a2e', 0.38], // marigold
-  ['#d2741c', 0.2], // saffron
-  ['#e8c170', 0.2], // gold
-  ['#f2e2bd', 0.15], // champagne
-  ['#d98e83', 0.07], // blush
+  ['#ff3d81', 0.3], // pink
+  ['#ff7a2f', 0.25], // orange
+  ['#ffc247', 0.18], // amber
+  ['#8b5cf6', 0.15], // violet
+  ['#fff1f6', 0.12], // white-hot glints
 ];
 const hexToRgb = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
 
@@ -105,13 +108,13 @@ void main() {
   vec3 n = normalize(vNormal);
   if (!gl_FrontFacing) n = -n;
   vec3 L = normalize(vec3(0.35, 0.85, 0.55));
-  float diff = 0.58 + 0.42 * max(dot(n, L), 0.0);
-  float trans = 0.22 * max(dot(-n, L), 0.0);
+  float diff = 0.45 + 0.55 * max(dot(n, L), 0.0);
+  float trans = 0.3 * max(dot(-n, L), 0.0);
   vec3 col = vColor * (diff + trans);
   vec3 V = normalize(-vView);
-  col += pow(1.0 - abs(dot(n, V)), 2.5) * 0.22 * vec3(1.0, 0.93, 0.82);
-  float fog = smoothstep(6.5, 15.0, -vView.z);
-  col = mix(col, uFog, fog * 0.85);
+  col += pow(1.0 - abs(dot(n, V)), 2.2) * 0.35 * vec3(1.0, 0.45, 0.7);
+  float fog = smoothstep(5.5, 14.0, -vView.z);
+  col = mix(col, uFog, fog * 0.92);
   gl_FragColor = vec4(col, uFade);
 }`;
 
@@ -140,21 +143,36 @@ export function mountHero(section: HTMLElement, canvas: HTMLCanvasElement, { var
   const CAM_Z = 9;
   camera.position.set(0, 0, CAM_Z);
 
+  // A tiny studio of coloured softboxes, baked into an environment map: the chrome reflects the brand palette.
+  const studio = new Scene();
+  studio.add(new Mesh(new SphereGeometry(20, 32, 16), new MeshBasicMaterial({ color: 0x050507, side: BackSide })));
+  const softbox = (hex: number, power: number, pos: [number, number, number], size: [number, number]) => {
+    const m = new Mesh(new PlaneGeometry(size[0], size[1]), new MeshBasicMaterial({ color: new Color(hex).multiplyScalar(power), side: DoubleSide }));
+    m.position.set(...pos);
+    m.lookAt(0, 0, 0);
+    studio.add(m);
+  };
+  softbox(0xff3d81, 6, [-6, 3, 4], [5, 8]);
+  softbox(0xff7a2f, 5, [6, -1, 5], [4, 7]);
+  softbox(0x8b5cf6, 6, [0, 7, -4], [10, 3]);
+  softbox(0xffffff, 9, [2, 4, 8], [3, 2]);
+  softbox(0xffc247, 4, [-3, -6, 2], [6, 2]);
   const pmrem = new PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environment = pmrem.fromScene(studio, 0.02).texture;
   pmrem.dispose();
-  const key = new DirectionalLight(0xfff0d2, 1.4);
+  const key = new DirectionalLight(0xffffff, 1.0);
   key.position.set(3, 5, 6);
   scene.add(key);
 
-  /* Two interlocked rings — a wedding-ring motif that doubles as a stage halo */
+  /* Two interlocked rings: a wedding-ring motif that doubles as a stage halo */
   const R = 1.25;
   const D = R * 1.75; // offset so ring B threads through ring A near its rim, leaving A's centre clear to fly through
   const ringGeo = new TorusGeometry(R, 0.085, 48, 240);
-  const gold = new MeshPhysicalMaterial({ color: 0xd8b06a, metalness: 1, roughness: 0.16, clearcoat: 0.7, clearcoatRoughness: 0.1, envMapIntensity: 1.3 });
-  const champagne = new MeshPhysicalMaterial({ color: 0xf1dcb2, metalness: 1, roughness: 0.3, clearcoat: 0.4, envMapIntensity: 1.15 });
-  const ringA = new Mesh(ringGeo, gold);
-  const ringB = new Mesh(ringGeo, champagne);
+  // Iridescent chrome: thin-film shimmer over a mirror finish
+  const chrome = new MeshPhysicalMaterial({ color: 0xffffff, metalness: 1, roughness: 0.08, iridescence: 0.9, iridescenceIOR: 1.5, iridescenceThicknessMinimum: 180, iridescenceThicknessMaximum: 620, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 1.4 });
+  const warmChrome = new MeshPhysicalMaterial({ color: 0xffd9c2, metalness: 1, roughness: 0.18, iridescence: 0.6, iridescenceIOR: 1.4, iridescenceThicknessMinimum: 240, iridescenceThicknessMaximum: 700, clearcoat: 0.8, envMapIntensity: 1.25 });
+  const ringA = new Mesh(ringGeo, chrome);
+  const ringB = new Mesh(ringGeo, warmChrome);
   ringB.rotation.x = Math.PI / 2;
   ringB.position.x = D;
   const inner = new Group();
@@ -166,7 +184,7 @@ export function mountHero(section: HTMLElement, canvas: HTMLCanvasElement, { var
   anchor.add(rings);
   scene.add(anchor);
 
-  /* Marigold petals: one instanced draw call, animated entirely on the GPU */
+  /* Petals: one instanced draw call, animated entirely on the GPU */
   const base = new PlaneGeometry(0.15, 0.25, 3, 6);
   const pos = base.attributes.position;
   for (let i = 0; i < pos.count; i++) {
@@ -202,7 +220,7 @@ export function mountHero(section: HTMLElement, canvas: HTMLCanvasElement, { var
     uBursts: { value: [0, 1, 2, 3].map(() => new Vector4(0, 0, -99, 0)) },
     uBox: { value: new Vector3(4, 3, 2.5) },
     uScroll: { value: 0 },
-    uFog: { value: new Vector3(...hexToRgb('#f4efe6')) },
+    uFog: { value: new Vector3(...hexToRgb('#07070a')) },
     uFade: { value: 1 },
   };
   const petalMat = new ShaderMaterial({ vertexShader: VERT, fragmentShader: FRAG, uniforms, side: DoubleSide, transparent: true, toneMapped: false });

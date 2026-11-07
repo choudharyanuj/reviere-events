@@ -1,4 +1,5 @@
 ---
+import { Picture } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
 import VendorGrid from '../components/VendorGrid.astro';
@@ -7,6 +8,7 @@ import CtaBanner from '../components/CtaBanner.astro';
 import Icon from '../components/Icon.astro';
 import BrandIcon from '../components/BrandIcon.astro';
 import { eventsPage, wa } from '../data/site';
+import { scenes, type SceneKey } from '../lib/images';
 
 const { hero, services, vendors, process, cta } = eventsPage;
 ---
@@ -15,55 +17,67 @@ const { hero, services, vendors, process, cta } = eventsPage;
 
   <!-- Scroll-spy service switcher (sticky only while the services are on screen) -->
   <div>
-  <div class="sticky top-[calc(var(--nav-h)+0.25rem)] z-30 mt-10" data-spy>
-    <div class="shell">
-      <nav aria-label="Jump to a service" class="no-scrollbar mx-auto flex w-max max-w-full gap-1 overflow-x-auto rounded-full bg-paper/80 p-1.5 shadow-[0_12px_40px_-20px_rgb(20_17_13/0.35)] ring-1 ring-ink/5 backdrop-blur-xl">
+    <div class="sticky top-[calc(var(--nav-h)+0.25rem)] z-30 mt-10" data-spy>
+      <div class="shell">
+        <nav aria-label="Jump to a service" class="glass no-scrollbar mx-auto flex w-max max-w-full gap-1 overflow-x-auto rounded-full p-1.5">
+          {
+            services.map((s) => (
+              <a href={`#${s.id}`} class="spy-link shrink-0 rounded-full px-4 py-2 text-sm font-medium text-muted transition-colors duration-500" data-spy-link={s.id}>
+                {s.chip}
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+    </div>
+
+    <section class="section pt-12 md:pt-16" id="all-services">
+      <div class="shell grid gap-5 md:grid-cols-2">
         {
-          services.map((s) => (
-            <a href={`#${s.id}`} class="spy-link shrink-0 rounded-full px-4 py-2 text-sm font-medium text-stone transition-colors duration-500" data-spy-link={s.id}>
-              {s.chip}
-            </a>
+          services.map((s, i) => (
+            <div class="flex" data-reveal style={`--d:${(i % 2) * 100}ms`}>
+              <article id={s.id} class="sheen card group flex w-full scroll-mt-44 flex-col overflow-hidden rounded-[2rem]" data-tilt>
+                <div class="relative aspect-[16/9] overflow-hidden">
+                  <Picture
+                    src={scenes[s.image as SceneKey]}
+                    alt=""
+                    formats={['avif', 'webp']}
+                    widths={[480, 800, 1200]}
+                    sizes="(min-width: 768px) 46vw, 92vw"
+                    loading="lazy"
+                    class="h-full w-full object-cover transition-transform duration-[1.4s] ease-(--ease-expo) group-hover:scale-105"
+                  />
+                  <div class="absolute inset-0 bg-linear-to-t from-card via-card/10 to-transparent" aria-hidden="true"></div>
+                  <span class="lift absolute bottom-5 left-7 grid h-14 w-14 place-items-center rounded-2xl text-bg md:left-11" style="background: var(--grad)">
+                    <Icon name={s.icon} class="h-6 w-6" />
+                  </span>
+                  <span class="absolute top-5 right-7 font-mono text-xs text-fg/70 md:right-11">{String(i + 1).padStart(2, '0')} / {String(services.length).padStart(2, '0')}</span>
+                </div>
+                <div class="flex flex-1 flex-col p-7 pt-6 md:p-11 md:pt-8">
+                  <h2 class="lift-sm font-display text-[clamp(1.8rem,2.8vw,2.6rem)] leading-[1] font-semibold tracking-tight">{s.title}</h2>
+                  <p class="mt-5 text-[1.0625rem] leading-relaxed text-muted">{s.desc}</p>
+                  <ul class="mt-8 grid gap-x-6 gap-y-3 sm:grid-cols-2">
+                    {s.points.map((p) => (
+                      <li class="flex items-start gap-3 text-[0.95rem]">
+                        <Icon name="Check" class="mt-1 h-4 w-4 shrink-0 text-orange" stroke={2} />
+                        {p}
+                      </li>
+                    ))}
+                  </ul>
+                  <div class="mt-auto pt-10"><div class="hairline"></div></div>
+                  <div class="mt-8">
+                    <button type="button" class="btn btn-wa" data-wa={s.wa} data-magnetic>
+                      <BrandIcon name="whatsapp" class="h-4 w-4" />
+                      <span>{s.cta}</span>
+                    </button>
+                  </div>
+                </div>
+              </article>
+            </div>
           ))
         }
-      </nav>
-    </div>
-  </div>
-
-  <section class="section pt-12 md:pt-16" id="all-services">
-    <div class="shell grid gap-5 md:grid-cols-2 [perspective:1600px]">
-      {
-        services.map((s, i) => (
-          <div class="flex" data-reveal style={`--d:${(i % 2) * 100}ms`}>
-          <article id={s.id} class="sheen flex w-full scroll-mt-44 flex-col rounded-[2rem] bg-paper p-7 ring-1 ring-ink/[0.06] md:p-11" data-tilt>
-            <div class="lift-sm flex items-start justify-between">
-              <span class="grid h-14 w-14 place-items-center rounded-2xl bg-ink text-champagne">
-                <Icon name={s.icon} class="h-6 w-6" />
-              </span>
-              <span class="font-serif text-[4.5rem] leading-[0.8] text-ink/[0.08]">{String(i + 1).padStart(2, '0')}</span>
-            </div>
-            <h2 class="lift-sm mt-10 font-serif text-[clamp(2rem,3.2vw,2.85rem)] leading-[1.02] tracking-tight">{s.title}</h2>
-            <p class="mt-5 text-[1.0625rem] leading-relaxed text-stone">{s.desc}</p>
-            <ul class="mt-8 grid gap-x-6 gap-y-3 sm:grid-cols-2">
-              {s.points.map((p) => (
-                <li class="flex items-start gap-3 text-[0.95rem]">
-                  <Icon name="Check" class="mt-1 h-4 w-4 shrink-0 text-gold" stroke={2} />
-                  {p}
-                </li>
-              ))}
-            </ul>
-            <div class="hairline mt-auto pt-px"></div>
-            <div class="mt-8">
-              <button type="button" class="btn btn-wa" data-wa={s.wa} data-magnetic>
-                <BrandIcon name="whatsapp" class="h-4 w-4" />
-                <span>{s.cta}</span>
-              </button>
-            </div>
-          </article>
-          </div>
-        ))
-      }
-    </div>
-  </section>
+      </div>
+    </section>
   </div>
 
   <VendorGrid eyebrow={vendors.eyebrow} title={vendors.title} subtitle={vendors.subtitle} items={vendors.items} />
@@ -75,8 +89,6 @@ const { hero, services, vendors, process, cta } = eventsPage;
 </Base>
 
 <style>
-  .hairline.mt-auto { margin-top: auto; }
-  article .hairline { margin-top: 2.5rem; }
-  .spy-link.is-active { background: var(--color-ink); color: var(--color-ivory); }
-  .spy-link:not(.is-active):hover { color: var(--color-ink); }
+  .spy-link.is-active { background: var(--color-fg); color: #0a0a0a; }
+  .spy-link:not(.is-active):hover { color: var(--color-fg); }
 </style>

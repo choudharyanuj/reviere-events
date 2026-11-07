@@ -1,8 +1,8 @@
 ---
 import '../styles/global.css';
-import serifWoff2 from '@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2?url';
-import serifItalicWoff2 from '@fontsource/instrument-serif/files/instrument-serif-latin-400-italic.woff2?url';
+import displayWoff2 from '../assets/fonts/ClashDisplay-Variable.woff2?url';
 import sansWoff2 from '@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url';
+import monoWoff2 from '@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2?url';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import WaFab from '../components/WaFab.astro';
@@ -31,11 +31,11 @@ const ogImage = new URL(site.ogImage, site.url).href;
     <meta name="description" content={m.description} />
     {keywords && <meta name="keywords" content={keywords} />}
     <link rel="canonical" href={canonical} />
-    <meta name="theme-color" content="#f4efe6" />
+    <meta name="theme-color" content="#07070a" />
     <link rel="icon" type="image/svg+xml" href={u('/favicon.svg')} />
-    <link rel="preload" as="font" type="font/woff2" href={serifWoff2} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={displayWoff2} crossorigin />
     <link rel="preload" as="font" type="font/woff2" href={sansWoff2} crossorigin />
-    {page === 'home' && <link rel="preload" as="font" type="font/woff2" href={serifItalicWoff2} crossorigin />}
+    <link rel="preload" as="font" type="font/woff2" href={monoWoff2} crossorigin />
 
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
@@ -57,7 +57,7 @@ const ogImage = new URL(site.ogImage, site.url).href;
     {page === 'home' && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>
   <body>
-    <a href="#main" class="fixed top-3 left-3 z-[60] -translate-y-24 rounded-full bg-ink px-4 py-2 text-sm text-ivory focus:translate-y-0">Skip to content</a>
+    <a href="#main" class="fixed top-3 left-3 z-[60] -translate-y-24 rounded-full bg-fg px-4 py-2 text-sm text-bg focus:translate-y-0">Skip to content</a>
     <Nav current={page} drawerWa={drawerWa} />
     <main id="main">
       <slot />

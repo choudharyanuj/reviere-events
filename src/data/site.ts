@@ -133,6 +133,7 @@ export const home = {
     items: [
       {
         icon: 'Gem',
+        image: 'wedding',
         title: 'Wedding Planning',
         desc: 'Bespoke wedding design, ritual coordination, Sangeet choreography, and full hospitality management for your special day.',
         points: ['Sangeet & Reception Management', 'Theme Decoration & Lighting', 'Complete Guest Hospitality'],
@@ -141,6 +142,7 @@ export const home = {
       },
       {
         icon: 'Briefcase',
+        image: 'corporate',
         title: 'Corporate Events',
         desc: 'High-impact corporate seminars, brand launches, annual galas, and executive conferences executed with absolute precision.',
         points: ['Stage Setup & AV Tech Support', 'VIP Hospitality & Logistics', 'Branding & Media Coverage'],
@@ -149,6 +151,7 @@ export const home = {
       },
       {
         icon: 'PartyPopper',
+        image: 'party',
         title: 'Private Celebrations',
         desc: 'Milestone birthday bashes, anniversary galas, ring ceremonies, and exclusive private house parties.',
         points: ['Custom Decor & Ambience', 'DJ, Sound & Entertainment', 'Catering & Beverage Management'],
@@ -157,6 +160,7 @@ export const home = {
       },
       {
         icon: 'Music',
+        image: 'sangeet',
         title: 'Stage Shows & Dance',
         desc: 'Electrifying live dance choreography, celebrity entry concepts, and choreographed stage shows directed by Manish Kumar.',
         points: ['Live Dance Performances', 'Family Sangeet Choreography', 'Concept Entries & Light FX'],
@@ -165,6 +169,7 @@ export const home = {
       },
       {
         icon: 'GraduationCap',
+        image: 'fest',
         title: 'College & Cultural Fests',
         desc: 'End-to-end festival management for colleges and institutions — artist booking, stage production, and crowd security.',
         points: ['Main Stage & Sound System', 'Celebrity & Artist Coordination', 'Security & Crowd Control'],
@@ -173,6 +178,7 @@ export const home = {
       },
       {
         icon: 'MapPin',
+        image: 'destination',
         title: 'Destination Events',
         desc: 'Seamless outstation event management across Bihar and neighboring states with dedicated on-site venue logistics.',
         points: ['Venue Scouting & Selection', 'Guest Transport & Lodging', 'On-Ground Event Operations'],
@@ -181,6 +187,7 @@ export const home = {
       },
       {
         icon: 'Car',
+        image: 'transport',
         title: 'Transportation Facility',
         desc: 'Luxury bridal cars, vintage vehicles, AC tempo travelers, and bus fleets for seamless guest logistics across Patna & Bihar.',
         points: ['Luxury Bridal Cars (Audi, BMW, Vintage)', 'AC Guest Buses & Airport Pickup Fleet', '24/7 On-Ground Transport Management'],
@@ -189,6 +196,7 @@ export const home = {
       },
       {
         icon: 'ShieldCheck',
+        image: 'security',
         title: 'Security & Bodyguards',
         desc: 'Elite personal bodyguards, trained bouncers, and comprehensive event checkpoint security for VIPs, galas, and weddings.',
         points: ['Trained Male & Female Event Bouncers', 'Armed & Unarmed Personal Bodyguards', 'Gate Metal Detectors & Crowd Discipline'],
@@ -219,10 +227,10 @@ export const home = {
     title: 'Featured Event Highlights',
     subtitle: 'A glimpse into recent luxury celebrations designed and executed by our team in Patna.',
     items: [
-      { image: 'eventHero', alt: 'Grand Wedding Decor', tag: 'Wedding Gala', title: 'Royal Palace Wedding' },
-      { image: 'contemporary', alt: 'Stage Dance Show', tag: 'Live Choreography', title: 'Sangeet Stage Performance' },
-      { image: 'salsa', alt: 'Corporate Gala', tag: 'Corporate Event', title: 'Annual Corporate Summit' },
-      { image: 'bollyhop', alt: 'College Fest', tag: 'Cultural Fest', title: 'University Youth Festival' },
+      { image: 'wedding', alt: 'Grand Wedding Decor', tag: 'Wedding Gala', title: 'Royal Palace Wedding' },
+      { image: 'sangeet', alt: 'Stage Dance Show', tag: 'Live Choreography', title: 'Sangeet Stage Performance' },
+      { image: 'corporate', alt: 'Corporate Gala', tag: 'Corporate Event', title: 'Annual Corporate Summit' },
+      { image: 'fest', alt: 'College Fest', tag: 'Cultural Fest', title: 'University Youth Festival' },
     ],
   },
   testimonials: {
@@ -272,6 +280,7 @@ export const eventsPage = {
   services: [
     {
       id: 'wedding',
+      image: 'wedding',
       chip: 'Wedding',
       icon: 'Gem',
       title: 'Wedding Planning & Management',
@@ -287,6 +296,7 @@ export const eventsPage = {
     },
     {
       id: 'corporate',
+      image: 'corporate',
       chip: 'Corporate',
       icon: 'Briefcase',
       title: 'Corporate Events & Seminars',
@@ -302,6 +312,7 @@ export const eventsPage = {
     },
     {
       id: 'private',
+      image: 'party',
       chip: 'Private',
       icon: 'PartyPopper',
       title: 'Private Parties & Celebrations',
@@ -317,6 +328,7 @@ export const eventsPage = {
     },
     {
       id: 'dance',
+      image: 'sangeet',
       chip: 'Stage & Dance',
       icon: 'Music',
       title: 'Stage Performances & Choreography',
@@ -332,6 +344,7 @@ export const eventsPage = {
     },
     {
       id: 'transportation',
+      image: 'transport',
       chip: 'Transport',
       icon: 'Car',
       title: 'Transportation & Luxury Fleet Facility',
@@ -347,6 +360,7 @@ export const eventsPage = {
     },
     {
       id: 'security',
+      image: 'security',
       chip: 'Security',
       icon: 'ShieldCheck',
       title: 'Security Guards, Bouncers & Bodyguards',

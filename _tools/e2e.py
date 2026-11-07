@@ -45,6 +45,9 @@ with sync_playwright() as p:
     check('home: every reveal element became visible after scrolling', shown == total, f'{shown}/{total}')
     check('home: counters finished at their targets', pg.locator('[data-counter]').all_inner_texts() == ['50', '7', '150', '100'], str(pg.locator('[data-counter]').all_inner_texts()))
     heads = pg.locator('[data-acc-trigger]')
+    heads.nth(5).scroll_into_view_if_needed(); pg.wait_for_timeout(400)
+    hb = heads.nth(5).bounding_box(); pg.mouse.move(hb['x'] + 300, hb['y'] + hb['height'] / 2); pg.mouse.move(hb['x'] + 320, hb['y'] + hb['height'] / 2, steps=4); pg.wait_for_timeout(700)
+    check('home: hovering a service shows its image preview', pg.evaluate("+getComputedStyle(document.querySelector('[data-svc-preview]')).opacity") > 0.5 and pg.locator('[data-svc-img="5"].is-active').count() == 1)
     heads.nth(2).scroll_into_view_if_needed(); heads.nth(2).click(); pg.wait_for_timeout(300)
     check('home: accordion opens the clicked service and closes the first',
           heads.nth(2).get_attribute('aria-expanded') == 'true' and heads.nth(0).get_attribute('aria-expanded') == 'false')
