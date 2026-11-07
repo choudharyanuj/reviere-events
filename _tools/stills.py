@@ -1,0 +1,16 @@
+from playwright.sync_api import sync_playwright
+with sync_playwright() as p:
+    b = p.chromium.launch(args=['--no-sandbox','--use-angle=swiftshader','--enable-unsafe-swiftshader'])
+    ctx = b.new_context(viewport={'width':1440,'height':900}, device_scale_factor=2, reduced_motion='reduce'); pg = ctx.new_page()
+    pg.goto('http://127.0.0.1:4321/', wait_until='networkidle'); pg.wait_for_timeout(3500)
+    pg.screenshot(path='shots/preview/1-home-desktop.png', type='png')
+    pg.evaluate("document.getElementById('services').scrollIntoView()"); pg.wait_for_timeout(600)
+    pg.evaluate("window.scrollBy(0, 380)"); pg.wait_for_timeout(600)
+    pg.screenshot(path='shots/preview/3-services.png')
+    pg.evaluate("document.getElementById('highlights').scrollIntoView()"); pg.wait_for_timeout(600); pg.evaluate("window.scrollBy(0, 330)"); pg.wait_for_timeout(800)
+    pg.screenshot(path='shots/preview/4-highlights.png')
+    ctx.close()
+    ctx = b.new_context(viewport={'width':390,'height':844}, device_scale_factor=3, is_mobile=True, has_touch=True, reduced_motion='reduce'); pg = ctx.new_page()
+    pg.goto('http://127.0.0.1:4321/', wait_until='networkidle'); pg.wait_for_timeout(3500)
+    pg.screenshot(path='shots/preview/2-home-phone.png')
+    ctx.close(); b.close()

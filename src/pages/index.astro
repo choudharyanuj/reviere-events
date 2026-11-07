@@ -106,7 +106,9 @@ const img = (k: string) => scenes[k as SceneKey];
               <div id={`svc-${i}`} class="svc-body grid" role="region" aria-labelledby={`svc-h-${i}`}>
                 <div class="overflow-hidden">
                   <div class="grid gap-8 pb-10 md:grid-cols-12 md:pb-12 md:pl-20">
-                    <Picture src={img(s.image)} alt="" formats={['avif', 'webp']} widths={[480, 800]} sizes="92vw" loading="lazy" class="aspect-[16/10] w-full rounded-2xl object-cover md:hidden" />
+                    <div class="md:hidden">
+                      <Picture src={img(s.image)} alt="" formats={['avif', 'webp']} widths={[480, 800]} sizes="92vw" loading="lazy" class="aspect-[16/10] w-full rounded-2xl object-cover" />
+                    </div>
                     <p class="text-lg leading-relaxed text-muted md:col-span-5">{s.desc}</p>
                     <ul class="space-y-3 md:col-span-4">
                       {s.points.map((p) => (
