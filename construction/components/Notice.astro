@@ -1,0 +1,33 @@
+---
+// The only thing production shows until launch. See LAUNCHED in astro.config.mjs.
+import displayWoff2 from '../../src/assets/fonts/ClashDisplay-Variable.woff2?url';
+const title = 'The website is under construction.';
+const line = 'It will be live soon.';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Reviere Events</title>
+    <meta name="description" content={`${title} ${line}`} />
+    <link rel="canonical" href="https://www.reviereevent.com/" />
+    <meta name="theme-color" content="#07070a" />
+    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <link rel="preload" as="font" type="font/woff2" href={displayWoff2} crossorigin />
+  </head>
+  <body>
+    <main>
+      <h1>{title}</h1>
+      <p>{line}</p>
+    </main>
+  </body>
+</html>
+<style is:global>
+  @font-face { font-family: "Clash Display"; src: url("../../src/assets/fonts/ClashDisplay-Variable.woff2") format("woff2"); font-weight: 200 700; font-display: swap; }
+  html { background: #07070a; color: #f5f5f7; color-scheme: dark; -webkit-font-smoothing: antialiased; }
+  body { margin: 0; }
+  main { min-height: 100svh; display: grid; place-content: center; gap: 1.1rem; padding: 2rem; text-align: center; }
+  h1 { margin: 0; font-family: "Clash Display", system-ui, sans-serif; font-weight: 600; font-size: clamp(2rem, 5.2vw, 4.25rem); line-height: 1.04; letter-spacing: -0.025em; max-width: 16ch; }
+  p { margin: 0; font-family: "Clash Display", system-ui, sans-serif; font-weight: 400; font-size: clamp(1.1rem, 1.9vw, 1.5rem); letter-spacing: 0.005em; color: #a1a1ab; }
+</style>

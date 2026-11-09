@@ -1,0 +1,8 @@
+---
+// Same notice at every address the full site has, so existing links and search results land on it.
+import Notice from '../components/Notice.astro';
+export function getStaticPaths() {
+  return [undefined, 'events', 'about', 'contact'].map((path) => ({ params: { path } }));
+}
+---
+<Notice />

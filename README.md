@@ -14,6 +14,13 @@ little memory or few CPU cores get fewer petals and a lower render resolution. W
 turned on, the site renders a single still frame. Without JavaScript, every piece of content is
 still visible.
 
+## Launch switch
+
+Until launch, production shows only "The website is under construction. It will be live soon." at every
+address. This notice is a separate, tiny build in `construction/` with no shared CSS, scripts or images.
+To put the full site live, set `LAUNCHED = true` in `astro.config.mjs` and push. To build the full site
+without launching (previews and tests), add `PUBLIC_FULL_SITE=1` to the build command.
+
 ## Editing content
 
 All text, phone numbers, WhatsApp messages and links live in `src/data/site.ts`. Images live in
@@ -30,7 +37,7 @@ node --test tests/content.test.mjs   # every string is checked against the origi
 ```
 
 Browser interaction tests (Playwright, Python): `python _tools/e2e.py http://localhost:4321` against a
-running build.
+running full-site build (`PUBLIC_FULL_SITE=1 npm run build`).
 
 ## Deploying
 
@@ -42,5 +49,5 @@ output directory `dist`. The Node version comes from `.node-version`. Pages serv
 (reviereevent.com → www, and reviereevent.in → www.reviereevent.com) are Cloudflare Redirect Rules on the zones.
 
 **Sub-path preview (GitHub Pages):**
-`SITE_BASE=/reviere-events PUBLIC_PREVIEW=1 npm run build`. A preview build tells search engines
+`SITE_BASE=/reviere-events PUBLIC_PREVIEW=1 PUBLIC_FULL_SITE=1 npm run build`. A preview build tells search engines
 not to index it.
