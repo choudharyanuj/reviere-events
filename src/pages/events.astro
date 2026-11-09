@@ -36,7 +36,7 @@ const { hero, services, vendors, process, cta } = eventsPage;
         {
           services.map((s, i) => (
             <div class="flex" data-reveal style={`--d:${(i % 2) * 100}ms`}>
-              <article id={s.id} class="sheen card group flex w-full scroll-mt-44 flex-col overflow-hidden rounded-[2rem]" data-tilt>
+              <article id={s.id} class="sheen card group flex w-full flex-col overflow-hidden rounded-[2rem]" data-tilt>
                 <div class="relative aspect-[16/9] overflow-hidden">
                   <Picture
                     src={scenes[s.image as SceneKey]}

@@ -1,6 +1,4 @@
-import Lenis from 'lenis';
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { buildInquiryMessage } from '../data/inquiry';
 
 declare global {
@@ -14,23 +12,40 @@ const fine = matchMedia('(pointer: fine)').matches;
 const $ = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => r.querySelector<T>(s);
 const $$ = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => Array.from(r.querySelectorAll<T>(s));
 
-gsap.registerPlugin(ScrollTrigger);
 
-/* ───────── Smooth scroll ───────── */
-let lenis: Lenis | null = null;
-if (!reduced) {
-  lenis = new Lenis({ lerp: 0.095, allowNestedScroll: true });
-  lenis.on('scroll', ScrollTrigger.update);
-  gsap.ticker.add((t) => lenis!.raf(t * 1000));
-  gsap.ticker.lagSmoothing(0);
-}
-// Resolve elements to an exact pixel position ourselves: Lenis's element targeting also applies
-// CSS scroll-margin/padding, which double-counts the offsets used here.
-const scrollToTarget = (target: number | HTMLElement, offset = 0) => {
-  const y = typeof target === 'number' ? target : target.getBoundingClientRect().top + scrollY + offset;
-  if (lenis) lenis.scrollTo(y, { duration: 1.5 });
-  else window.scrollTo({ top: y, behavior: 'auto' });
+/* ───────── Scrolling ─────────
+   Native scrolling only: trackpad momentum, keyboard keys, nested scrollers (the gallery) and
+   scroll restoration all behave as the browser intends. Programmatic jumps glide smoothly. */
+// Layout position, ignoring transforms (cards that haven't revealed yet still sit 28px low).
+const docTop = (el: HTMLElement) => {
+  let y = 0;
+  for (let n: HTMLElement | null = el; n; n = n.offsetParent as HTMLElement | null) y += n.offsetTop;
+  return y;
 };
+const scrollToTarget = (target: number | HTMLElement, offset = 0) => {
+  const y = typeof target === 'number' ? target : docTop(target) + offset;
+  window.scrollTo({ top: y, behavior: reduced ? 'auto' : 'smooth' });
+};
+
+/* ───────── Exact scroll restoration on reload / Back ─────────
+   The browser restores before the web fonts settle the layout, which can land a few hundred px off.
+   Restore ourselves once fonts are ready, unless the visitor has already started scrolling. */
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+  const key = `rv-scroll:${location.pathname}`;
+  addEventListener('pagehide', () => sessionStorage.setItem(key, String(Math.round(scrollY))));
+  const saved = Number(sessionStorage.getItem(key) || 0);
+  const navType = (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined)?.type;
+  if (saved > 0 && !location.hash && (navType === 'reload' || navType === 'back_forward')) {
+    let userMoved = false;
+    const stop = () => (userMoved = true);
+    ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach((t) => addEventListener(t, stop, { once: true, passive: true }));
+    const go = () => !userMoved && window.scrollTo(0, saved);
+    go();
+    document.fonts?.ready.then(go);
+    addEventListener('load', go, { once: true });
+  }
+}
 
 /* ───────── WhatsApp (same wa.me deep links as the original site) ───────── */
 const openWhatsApp = (message: string) =>
@@ -56,16 +71,39 @@ const revealer = new IntersectionObserver(
 );
 $$('[data-reveal], [data-split]').forEach((el) => revealer.observe(el));
 
+/* ───────── Scroll-driven effects ─────────
+   A plain passive scroll listener batched to one frame. (GSAP ScrollTrigger was dropped: it keeps an
+   empty requestAnimationFrame loop running forever, so the page never goes idle.) */
+const scrollFx: ((vh: number) => void)[] = [];
+let fxQueued = false;
+const runFx = () => {
+  fxQueued = false;
+  const vh = innerHeight;
+  for (const fx of scrollFx) fx(vh);
+};
+const queueFx = () => {
+  if (fxQueued) return;
+  fxQueued = true;
+  requestAnimationFrame(runFx);
+};
+addEventListener('scroll', queueFx, { passive: true });
+addEventListener('resize', queueFx);
+addEventListener('load', queueFx);
+// 0 → 1 as the element's top passes `start`·vh until its bottom reaches `end`·vh
+const progress = (el: Element, vh: number, start: number, end: number) => {
+  const r = el.getBoundingClientRect();
+  return Math.max(0, Math.min(1, (vh * start - r.top) / Math.max(1, vh * (start - end) + r.height)));
+};
+
 /* ───────── Counters ───────── */
 if (!reduced) {
-  $$('[data-counter]').forEach((el) => {
-    const target = Number(el.dataset.counter);
-    el.textContent = '0';
-    ScrollTrigger.create({
-      trigger: el,
-      start: 'top 92%',
-      once: true,
-      onEnter: () => {
+  const counterIO = new IntersectionObserver(
+    (entries) =>
+      entries.forEach((en) => {
+        if (!en.isIntersecting) return;
+        counterIO.unobserve(en.target);
+        const el = en.target as HTMLElement;
+        const target = Number(el.dataset.counter);
         const o = { v: 0 };
         gsap.to(o, {
           v: target,
@@ -74,8 +112,12 @@ if (!reduced) {
           onUpdate: () => (el.textContent = String(Math.floor(o.v))),
           onComplete: () => (el.textContent = String(target)),
         });
-      },
-    });
+      }),
+    { rootMargin: '0px 0px -8% 0px' },
+  );
+  $$('[data-counter]').forEach((el) => {
+    el.textContent = '0';
+    counterIO.observe(el);
   });
 }
 
@@ -120,8 +162,6 @@ if (menuToggle && drawer) {
     drawer.toggleAttribute('inert', !open);
     drawer.setAttribute('aria-hidden', String(!open));
     navEl?.classList.toggle('is-solid', open);
-    if (open) lenis?.stop();
-    else lenis?.start();
     document.documentElement.style.overflow = open ? 'hidden' : '';
   };
   menuToggle.addEventListener('click', () => setMenu(menuToggle.getAttribute('aria-expanded') !== 'true'));
@@ -223,27 +263,46 @@ $$('[data-glow-group]').forEach((g) => {
 });
 
 /* ───────── Services index (accordion) ───────── */
+// Keeps an element at the same spot on screen while content above it animates open/closed.
+// Chrome's own scroll anchoring is paused meanwhile; otherwise both correct the same shift and it doubles.
+const root = document.documentElement;
+let holds = 0;
+const holdInPlace = (el: HTMLElement, ms = 1400) => {
+  const top0 = el.getBoundingClientRect().top;
+  const t0 = performance.now();
+  holds++;
+  root.style.overflowAnchor = 'none';
+  const step = () => {
+    const d = el.getBoundingClientRect().top - top0;
+    if (Math.abs(d) > 0.5) window.scrollBy(0, d);
+    if (performance.now() - t0 < ms) requestAnimationFrame(step);
+    else if (--holds === 0) root.style.overflowAnchor = '';
+  };
+  requestAnimationFrame(step);
+};
 $$('[data-accordion]').forEach((acc) => {
   const items = $$('.svc', acc);
   items.forEach((li) => {
     const btn = $('[data-acc-trigger]', li)!;
     btn.addEventListener('click', () => {
       const open = btn.getAttribute('aria-expanded') !== 'true';
+      holdInPlace(btn);
       items.forEach((o) => {
         const on = o === li ? open : false;
         $('[data-acc-trigger]', o)!.setAttribute('aria-expanded', String(on));
         o.classList.toggle('is-open', on);
       });
-      setTimeout(() => ScrollTrigger.refresh(), 950);
     });
   });
 });
 
-/* ───────── Services: image preview that follows the cursor (mouse only) ───────── */
+/* ───────── Services: image preview that follows the cursor (mouse only) ─────────
+   Visible only while the mouse is over the title of a closed service. Anything else hides it:
+   opening a row, scrolling (wheel, keys or scrollbar), leaving the list or the window, switching tabs. */
 const preview = $('[data-svc-preview]');
 const accordion = $('[data-accordion]');
 if (preview && accordion && fine && !reduced) {
-  // Only start downloading the preview images once the list is close to the viewport.
+  // Only download the preview images once the list is close to the viewport.
   preview.style.display = 'none';
   const near = new IntersectionObserver(([en]) => {
     if (!en.isIntersecting) return;
@@ -253,48 +312,80 @@ if (preview && accordion && fine && !reduced) {
   near.observe(accordion);
 
   const imgs = $$('[data-svc-img]', preview);
-  gsap.set(preview, { scale: 0.85 });
-  const xTo = gsap.quickTo(preview, 'x', { duration: 0.7, ease: 'power3' });
-  const yTo = gsap.quickTo(preview, 'y', { duration: 0.7, ease: 'power3' });
-  const rTo = gsap.quickTo(preview, 'rotation', { duration: 0.9, ease: 'power3' });
-  let current = -1, shown = false, lastX = 0;
-  const hide = () => {
+  const xTo = gsap.quickTo(preview, 'x', { duration: 0.6, ease: 'power3' });
+  const yTo = gsap.quickTo(preview, 'y', { duration: 0.6, ease: 'power3' });
+  const rTo = gsap.quickTo(preview, 'rotation', { duration: 0.8, ease: 'power3' });
+  let current = '', shown = false, lastX = 0;
+  // Opt-in trace for automated QA only (window.__qaLog = [] before load).
+  const qa = (...entry: unknown[]) => (window as unknown as { __qaLog?: unknown[] }).__qaLog?.push([Math.round(performance.now()), ...entry]);
+
+  const hide = (e?: Event) => {
+    current = '';
     if (!shown) return;
+    qa('hide', e?.type ?? 'call');
     shown = false;
-    current = -1;
-    gsap.to(preview, { opacity: 0, scale: 0.85, duration: 0.4, ease: 'power3.out' });
+    preview.classList.remove('is-shown'); // CSS fade: runs on the compositor, immune to main-thread lag
   };
+  const place = (cx: number, cy: number) => {
+    const w = preview.offsetWidth, h = preview.offsetHeight, gap = 36;
+    // Sit on the side of the cursor with more room, so the preview never covers what it points at.
+    let x = cx > innerWidth * 0.5 ? cx - w - gap : cx + gap;
+    x = Math.max(16, Math.min(innerWidth - w - 16, x));
+    const y = Math.max(16, Math.min(innerHeight - h - 16, cy - h / 2));
+    return { x, y };
+  };
+
   accordion.addEventListener('pointermove', (e) => {
-    if (e.pointerType !== 'mouse') return;
+    // Chrome sends motionless "fake" moves after scrolling or layout changes; only real movement counts.
+    if (e.pointerType !== 'mouse' || (e.movementX === 0 && e.movementY === 0)) return;
     const t = e.target as Element;
-    const row = t.closest<HTMLElement>('[data-svc]');
-    if (!row || !t.closest('.svc-head')) return hide();
+    const head = t.closest<HTMLElement>('.svc-head');
+    const row = head?.closest<HTMLElement>('[data-svc]');
+    if (!head || !row || row.classList.contains('is-open')) return hide();
     const i = row.dataset.svc!;
-    if (i !== String(current)) {
+    if (i !== current) {
       imgs.forEach((im) => im.classList.toggle('is-active', im.dataset.svcImg === i));
-      current = Number(i);
+      current = i;
     }
-    const x = Math.min(innerWidth - preview.offsetWidth - 16, e.clientX + 36);
-    const y = e.clientY - preview.offsetHeight / 2;
+    const { x, y } = place(e.clientX, e.clientY);
     if (!shown) {
-      gsap.set(preview, { x, y });
-      gsap.to(preview, { opacity: 1, scale: 1, duration: 0.5, ease: 'power3.out' });
       shown = true;
+      qa('show', i, e.movementX, e.movementY, e.isTrusted);
+      gsap.set(preview, { x, y });
+      preview.classList.add('is-shown');
     }
     xTo(x);
     yTo(y);
-    rTo(Math.max(-9, Math.min(9, (e.clientX - lastX) * 0.6)));
+    rTo(Math.max(-8, Math.min(8, (e.clientX - lastX) * 0.5)));
     lastX = e.clientX;
   });
   accordion.addEventListener('pointerleave', hide);
+  accordion.addEventListener('pointerdown', hide);
   addEventListener('scroll', hide, { passive: true });
+  addEventListener('wheel', hide, { passive: true });
+  addEventListener('keydown', hide);
+  addEventListener('blur', hide);
+  addEventListener('resize', hide);
+  document.documentElement.addEventListener('pointerleave', hide);
+  document.addEventListener('visibilitychange', hide);
+  new IntersectionObserver(([en]) => !en.isIntersecting && hide()).observe(accordion);
 }
 
 /* ───────── Ticker leans into the scroll direction ───────── */
 const marquee = $('[data-marquee]');
-if (marquee && lenis) {
+if (marquee) new IntersectionObserver(([en]) => marquee.classList.toggle('is-offscreen', !en.isIntersecting)).observe(marquee);
+if (marquee && !reduced) {
   const skewTo = gsap.quickTo(marquee, 'skewX', { duration: 0.6, ease: 'power3' });
-  lenis.on('scroll', (l: Lenis) => skewTo(Math.max(-14, Math.min(14, l.velocity * -0.4))));
+  let lastY = scrollY, lastT = performance.now(), rest = 0;
+  addEventListener('scroll', () => {
+    const now = performance.now();
+    const v = (scrollY - lastY) / Math.max(8, now - lastT); // px per ms
+    lastY = scrollY;
+    lastT = now;
+    skewTo(Math.max(-12, Math.min(12, -v * 6)));
+    clearTimeout(rest);
+    rest = window.setTimeout(() => skewTo(0), 120);
+  }, { passive: true });
 }
 
 /* ───────── Highlights gallery: drag, inertia, arrows, parallax ───────── */
@@ -367,14 +458,15 @@ if (gallery) {
   track.addEventListener('pointercancel', end);
 }
 
-/* ───────── Testimonials: tabs, autoplay, swipe ───────── */
+/* ───────── Testimonials: tabs, autoplay, swipe ─────────
+   The progress bar is a CSS animation (runs on the compositor); JS only advances when it ends. */
 const tWrap = $('[data-testimonials]');
 if (tWrap) {
   const slides = $$('[data-t-slide]', tWrap);
   const tabs = $$('[data-t-tab]', tWrap);
   let idx = 0;
-  let timer: gsap.core.Tween | null = null;
-  let inView = false;
+  let inView = false, hovering = false;
+  const syncPause = () => tWrap.classList.toggle('is-paused', !inView || hovering || reduced);
   const show = (i: number) => {
     idx = (i + slides.length) % slides.length;
     slides.forEach((s, k) => {
@@ -384,25 +476,20 @@ if (tWrap) {
     tabs.forEach((t, k) => {
       t.setAttribute('aria-selected', String(k === idx));
       t.tabIndex = k === idx ? 0 : -1;
-      const bar = $('.t-progress', t)!;
-      gsap.killTweensOf(bar);
-      gsap.set(bar, { scaleX: 0 });
     });
-    timer?.kill();
-    if (!reduced) {
-      timer = gsap.to($('.t-progress', tabs[idx])!, { scaleX: 1, duration: 7, ease: 'none', onComplete: () => show(idx + 1) });
-      if (!inView) timer.pause();
-    }
   };
-  tabs.forEach((t, k) => t.addEventListener('click', () => show(k)));
+  tabs.forEach((t, k) => {
+    t.addEventListener('click', () => show(k));
+    $('.t-progress', t)?.addEventListener('animationend', () => !reduced && k === idx && show(idx + 1));
+  });
   tabs[0]?.parentElement?.addEventListener('keydown', (e) => {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
     e.preventDefault();
     show(idx + (e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1));
     tabs[idx].focus();
   });
-  tWrap.addEventListener('pointerenter', (e) => e.pointerType === 'mouse' && timer?.pause());
-  tWrap.addEventListener('pointerleave', (e) => e.pointerType === 'mouse' && inView && timer?.resume());
+  tWrap.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { hovering = true; syncPause(); } });
+  tWrap.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') { hovering = false; syncPause(); } });
   const stage = $('[data-t-stage]', tWrap)!;
   let sx = 0, sy = 0;
   stage.addEventListener('pointerdown', (e) => {
@@ -413,16 +500,8 @@ if (tWrap) {
     const dx = e.clientX - sx;
     if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(e.clientY - sy)) show(idx + (dx < 0 ? 1 : -1));
   });
-  ScrollTrigger.create({
-    trigger: tWrap,
-    start: 'top 85%',
-    end: 'bottom 15%',
-    onToggle: (s) => {
-      inView = s.isActive;
-      if (inView) timer?.resume();
-      else timer?.pause();
-    },
-  });
+  new IntersectionObserver(([en]) => { inView = en.isIntersecting; syncPause(); }, { threshold: 0.25 }).observe(tWrap);
+  syncPause();
   show(0);
 }
 
@@ -437,17 +516,39 @@ if (spy) {
       l.classList.toggle('is-active', on);
       if (on) bar.scrollTo({ left: l.offsetLeft - bar.clientWidth / 2 + l.offsetWidth / 2, behavior: 'smooth' });
     });
+  const offset = () => -((navEl?.offsetHeight ?? 72) + bar.offsetHeight + 24);
+  const targets = links.map((l) => [l.dataset.spyLink!, document.getElementById(l.dataset.spyLink!)] as const).filter(([, t]) => t);
+  let activeId = '';
+  let lockedUntil = 0;
+  scrollFx.push((vh) => {
+    if (performance.now() < lockedUntil) return; // a chip was just clicked: keep its highlight while we scroll there
+    const hits = targets.filter(([, t]) => {
+      const r = t!.getBoundingClientRect();
+      return r.top <= vh * 0.6 && r.bottom >= vh * 0.6;
+    });
+    // Two cards share each row on desktop; keep the current highlight if it's still on that line.
+    if (!hits.length || hits.some(([id]) => id === activeId)) return;
+    setActive((activeId = hits[0][0]));
+  });
   links.forEach((l) => {
-    const id = l.dataset.spyLink!;
-    const target = document.getElementById(id);
+    const target = document.getElementById(l.dataset.spyLink!);
     if (!target) return;
-    ScrollTrigger.create({ trigger: target, start: 'top 60%', end: 'bottom 60%', onToggle: (s) => s.isActive && setActive(id) });
     l.addEventListener('click', (e) => {
       e.preventDefault();
-      scrollToTarget(target, -150);
-      history.replaceState(null, '', `#${id}`);
+      setActive((activeId = l.dataset.spyLink!));
+      lockedUntil = performance.now() + 1500;
+      scrollToTarget(target, offset());
+      history.replaceState(null, '', `#${l.dataset.spyLink}`);
     });
   });
+  // Arriving from another page with #wedding etc.: land exactly below the sticky bars.
+  const arrival = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (arrival && targets.some(([, t]) => t === arrival)) {
+    const go = () => window.scrollTo({ top: docTop(arrival) + offset(), behavior: 'auto' });
+    go();
+    document.fonts?.ready.then(go);
+    addEventListener('load', go, { once: true });
+  }
 }
 
 /* ───────── Timelines: drawn line, active step, rolling counter ───────── */
@@ -457,16 +558,20 @@ $$('[data-timeline]').forEach((tl) => {
   const reel = $('[data-timeline-reel]', tl);
   const list = steps[0]?.parentElement;
   if (!list) return;
-  if (fill) {
-    if (reduced) gsap.set(fill, { scaleY: 1 });
-    else gsap.to(fill, { scaleY: 1, ease: 'none', scrollTrigger: { trigger: list, start: 'top 62%', end: 'bottom 62%', scrub: 0.6 } });
-  }
+  let current = -1;
   const activate = (i: number) => {
+    if (i === current) return;
+    current = i;
     steps.forEach((x, k) => x.classList.toggle('is-active', k <= i));
     if (reel) reel.style.transform = `translateY(${(-i * 100) / steps.length}%)`;
   };
-  steps.forEach((s, i) => ScrollTrigger.create({ trigger: s, start: 'top 62%', end: 'bottom 62%', onToggle: (st) => st.isActive && activate(i) }));
-  activate(0);
+  if (fill) fill.style.transition = 'transform 120ms linear';
+  scrollFx.push((vh) => {
+    if (fill) fill.style.transform = `scaleY(${reduced ? 1 : progress(list, vh, 0.62, 0.62)})`;
+    let i = 0;
+    steps.forEach((s, k) => s.getBoundingClientRect().top <= vh * 0.62 && (i = k));
+    activate(i);
+  });
 });
 
 /* ───────── Quote: words light up with scroll ───────── */
@@ -476,15 +581,12 @@ $$('[data-scrub-words]').forEach((q) => {
     words.forEach((w) => w.classList.add('is-lit'));
     return;
   }
-  ScrollTrigger.create({
-    trigger: q,
-    start: 'top 82%',
-    end: 'bottom 48%',
-    scrub: true,
-    onUpdate: (s) => {
-      const n = Math.round(s.progress * words.length);
-      words.forEach((w, i) => w.classList.toggle('is-lit', i < n));
-    },
+  let lit = -1;
+  scrollFx.push((vh) => {
+    const n = Math.round(progress(q, vh, 0.82, 0.48) * words.length);
+    if (n === lit) return;
+    lit = n;
+    words.forEach((w, i) => w.classList.toggle('is-lit', i < n));
   });
 });
 
@@ -503,9 +605,10 @@ if (dance) {
   });
 }
 if (!reduced) {
-  $$('[data-spin-on-scroll]').forEach((el) =>
-    gsap.to(el, { rotate: 300, ease: 'none', scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 1 } }),
-  );
+  $$('[data-spin-on-scroll]').forEach((el) => {
+    el.style.transition = 'transform 300ms linear';
+    scrollFx.push((vh) => (el.style.transform = `rotate(${progress(el, vh, 1, 0) * 300}deg)`));
+  });
 }
 
 /* ───────── Contact: live WhatsApp preview, validation, copy buttons ───────── */
@@ -583,6 +686,9 @@ $$('[data-copy]').forEach((b) =>
   }),
 );
 
+/* ───────── Pause decorative CSS loops while their section is off screen ───────── */
+$$('[data-hero3d]').forEach((h) => new IntersectionObserver(([en]) => h.classList.toggle('is-offscreen', !en.isIntersecting)).observe(h));
+
 /* ───────── 3D scenes, loaded after first paint so they never delay the page ───────── */
 const hero = $('[data-hero3d]');
 const heroCanvas = hero && $<HTMLCanvasElement>('[data-hero-canvas]', hero);
@@ -611,5 +717,5 @@ if (spots.length) {
   spots.forEach((s) => lazy.observe(s));
 }
 
-// Images and fonts change layout height; keep scroll-driven animations in sync.
-addEventListener('load', () => ScrollTrigger.refresh());
+queueFx();
+document.fonts?.ready.then(queueFx);

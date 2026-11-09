@@ -7,7 +7,6 @@ export const site = {
   url: 'https://www.reviereevent.com',
   whatsappPhone: '918893535829',
   mainPhone: { href: 'tel:+918893535829', label: '+91 88935 35829' },
-  altPhone: { href: 'tel:+917762908507', label: '+91 77629 08507' },
   email: 'reviereevent@gmail.com',
   location: 'Patna, Bihar, India',
   instagram: 'https://instagram.com/reviereevent',
@@ -558,7 +557,6 @@ export const contactPage = {
   info: {
     title: 'Contact Information',
     main: { title: 'Main Phone & WhatsApp', link: 'Chat on WhatsApp →', wa: 'Hi Manish! I would like to inquire about event planning.' },
-    alt: { title: 'Alternative Phone', note: 'Direct calls & bookings' },
     email: { title: 'Official Email', note: 'Send event briefs & RFPs' },
     location: { title: 'Location', note: 'Serving Patna, Muzaffarpur, Gaya, and destination events across Bihar.' },
     hours: { title: 'Consultation Hours', value: 'Mon - Sun: 9:00 AM - 9:00 PM' },

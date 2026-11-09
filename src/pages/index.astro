@@ -132,7 +132,7 @@ const img = (k: string) => scenes[k as SceneKey];
         }
       </ul>
     </div>
-    <div class="svc-preview pointer-events-none fixed top-0 left-0 z-30 hidden h-[15rem] w-[22rem] overflow-hidden rounded-2xl opacity-0 md:block" data-svc-preview aria-hidden="true">
+    <div class="svc-preview pointer-events-none fixed top-0 left-0 z-30 hidden h-[15rem] w-[22rem] overflow-hidden rounded-2xl md:block" data-svc-preview aria-hidden="true">
       {
         services.items.map((s, i) => (
           <Picture src={img(s.image)} alt="" formats={['avif', 'webp']} widths={[480, 720]} sizes="22rem" loading="lazy" class="svc-preview-img absolute inset-0 h-full w-full object-cover opacity-0" data-svc-img={i} />
@@ -153,7 +153,7 @@ const img = (k: string) => scenes[k as SceneKey];
         <button type="button" class="gal-btn" aria-label="Next highlight" data-gal-next><Icon name="ArrowRight" class="h-5 w-5" /></button>
       </div>
     </div>
-    <div class="no-scrollbar mt-8 flex snap-x snap-mandatory scroll-px-(--gutter) gap-4 overflow-x-auto px-(--gutter) md:gap-6" data-gal-track data-cursor="Drag" tabindex="0" aria-label="Featured event highlights">
+    <div class="no-scrollbar mt-8 flex snap-x snap-mandatory scroll-px-(--gutter) gap-4 overflow-x-auto overflow-y-hidden overscroll-x-contain px-(--gutter) md:snap-none md:gap-6" data-gal-track data-cursor="Drag" tabindex="0" aria-label="Featured event highlights">
       {
         highlights.items.map((h, i) => (
           <figure class:list={['gal-card group relative h-[min(70svh,620px)] shrink-0 snap-start overflow-hidden rounded-[1.75rem] bg-card', i === 0 ? 'w-[86vw] md:w-[62vw] lg:w-[50vw]' : 'w-[74vw] sm:w-[46vw] lg:w-[29vw]']} data-reveal style={`--d:${i * 90}ms`}>
@@ -218,7 +218,7 @@ const img = (k: string) => scenes[k as SceneKey];
                   <span class="block truncate text-sm font-medium">{t.name}</span>
                   <span class="block truncate font-mono text-[0.68rem] text-muted">{t.role}</span>
                 </span>
-                <span class="t-progress absolute bottom-0 left-0 h-[2px] w-full origin-left scale-x-0" style="background: var(--grad)" aria-hidden="true"></span>
+                <span class="t-progress absolute bottom-0 left-0 h-[2px] w-full origin-left" style="background: var(--grad)" aria-hidden="true"></span>
               </button>
             ))
           }
@@ -240,10 +240,12 @@ const img = (k: string) => scenes[k as SceneKey];
     mask-image: linear-gradient(to bottom, #000 0%, transparent 85%);
   }
   .scroll-cue { position: relative; width: 1px; height: 2.25rem; background: rgb(255 255 255 / 0.15); overflow: hidden; }
-  .scroll-cue::after { content: ''; position: absolute; inset: 0; background: var(--grad); animation: cue 2.2s var(--ease-expo) infinite; }
+  .scroll-cue::after { content: ''; position: absolute; inset: 0; background: var(--grad); animation: cue 2.2s var(--ease-expo) 5; }
+  .is-offscreen .scroll-cue::after { animation-play-state: paused; }
   @keyframes cue { 0% { transform: translateY(-100%); } 60%, 100% { transform: translateY(100%); } }
 
   /* Ticker */
+  [data-marquee].is-offscreen .animate-marquee { animation-play-state: paused; }
   .marquee-word.is-outline { color: transparent; -webkit-text-stroke: 1px rgb(255 255 255 / 0.45); }
   .marquee-word { transition: color 0.4s; }
   .marquee-word:hover { color: var(--color-orange); -webkit-text-stroke: 0; }
@@ -259,7 +261,9 @@ const img = (k: string) => scenes[k as SceneKey];
     .svc-head:hover .svc-icon { transform: rotate(-14deg) scale(1.06); }
     [data-accordion]:has(.svc-head:hover) .svc:not(:has(.svc-head:hover)) .svc-title { opacity: 0.28; }
   }
-  .svc-preview { box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.9), inset 0 0 0 1px rgb(255 255 255 / 0.1); }
+  .svc-preview { opacity: 0; scale: 0.85; transition: opacity 0.22s ease-out, scale 0.35s var(--ease-expo); box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.9), inset 0 0 0 1px rgb(255 255 255 / 0.1); }
+  .svc-preview.is-shown { opacity: 1; scale: 1; }
+  [data-accordion] { overflow-anchor: none; }
   .svc-preview-img { transition: opacity 0.5s var(--ease-expo), scale 0.8s var(--ease-expo); scale: 1.12; }
   .svc-preview-img.is-active { opacity: 1; scale: 1; }
 
@@ -274,11 +278,15 @@ const img = (k: string) => scenes[k as SceneKey];
   /* Testimonials */
   .t-slide { visibility: hidden; }
   .t-slide.is-active { visibility: visible; }
-  .t-slide .tw { display: inline-block; white-space: pre; opacity: 0; filter: blur(8px); transform: translateY(0.3em); transition: opacity 0.7s var(--ease-expo), filter 0.7s var(--ease-expo), transform 0.9s var(--ease-expo); }
-  .t-slide.is-active .tw { opacity: 1; filter: none; transform: none; transition-delay: calc(var(--i) * 22ms); }
+  .t-slide .tw { display: inline-block; white-space: pre; opacity: 0; transform: translateY(0.3em); transition: opacity 0.6s var(--ease-expo), transform 0.8s var(--ease-expo); }
+  .t-slide.is-active .tw { opacity: 1; transform: none; transition-delay: calc(var(--i) * 18ms); }
+  .t-progress { transform: scaleX(0); }
+  .t-tab[aria-selected='true'] .t-progress { animation: t-progress 7s linear forwards; }
+  [data-testimonials].is-paused .t-progress { animation-play-state: paused; }
+  @keyframes t-progress { to { transform: scaleX(1); } }
   .t-slide .t-meta { opacity: 0; transform: translateY(10px); transition: opacity 0.6s, transform 0.8s var(--ease-expo); }
   .t-slide.is-active .t-meta { opacity: 1; transform: none; transition-delay: 0.45s; }
   html:not(.js) .t-slide { visibility: visible; position: static; }
-  html:not(.js) .t-slide .tw, html:not(.js) .t-slide .t-meta { opacity: 1; filter: none; transform: none; }
+  html:not(.js) .t-slide .tw, html:not(.js) .t-slide .t-meta { opacity: 1; transform: none; }
   .t-tab[aria-selected='true'] { background: rgb(255 255 255 / 0.06); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.18); }
 </style>

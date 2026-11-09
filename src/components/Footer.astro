@@ -44,7 +44,6 @@ const word = 'REVIERE'.split('');
           <ul class="mt-6 space-y-3 text-[0.95rem] text-fg/80">
             <li class="flex items-center gap-2.5"><Icon name="MapPin" class="h-4 w-4 text-orange" /> {site.location}</li>
             <li class="flex items-center gap-2.5"><Icon name="Phone" class="h-4 w-4 text-orange" /> <a class="link-underline" href={site.mainPhone.href}>{site.mainPhone.label}</a></li>
-            <li class="flex items-center gap-2.5"><Icon name="Phone" class="h-4 w-4 text-orange" /> <a class="link-underline" href={site.altPhone.href}>{site.altPhone.label}</a></li>
             <li class="flex items-center gap-2.5"><Icon name="Mail" class="h-4 w-4 text-orange" /> <a class="link-underline" href={`mailto:${site.email}`}>{site.email}</a></li>
           </ul>
           <button type="button" class="btn btn-sm btn-wa mt-7" data-wa={wa.footer} data-magnetic>

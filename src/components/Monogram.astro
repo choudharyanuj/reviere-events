@@ -8,6 +8,8 @@ const { class: cls = 'h-10 w-10' } = Astro.props;
   <span class="relative font-display text-[0.92em] font-semibold tracking-tight">RE</span>
 </span>
 <style>
-  .mono-ring { background: conic-gradient(from 0deg, var(--color-pink), var(--color-orange), var(--color-amber), var(--color-violet), var(--color-pink)); animation: mono-spin 9s linear infinite; }
+  /* Spins only while the logo is hovered, so the page can sit idle. */
+  .mono-ring { background: conic-gradient(from 0deg, var(--color-pink), var(--color-orange), var(--color-amber), var(--color-violet), var(--color-pink)); animation: mono-spin 6s linear infinite paused; }
+  :global(.group:hover) .mono-ring { animation-play-state: running; }
   @keyframes mono-spin { to { transform: rotate(360deg); } }
 </style>

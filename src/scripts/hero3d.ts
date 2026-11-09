@@ -132,7 +132,9 @@ export function mountHero(section: HTMLElement, canvas: HTMLCanvasElement, { var
 
   const nav = navigator as Navigator & { deviceMemory?: number };
   const lowPower = (nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4;
-  renderer.setPixelRatio(Math.min(devicePixelRatio, lowPower ? 1.25 : 1.75));
+  // Retina laptops would otherwise shade ~4M pixels a frame; 1.5x is visually indistinguishable here.
+  let pixelRatio = Math.min(devicePixelRatio, lowPower ? 1 : 1.5);
+  renderer.setPixelRatio(pixelRatio);
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.toneMapping = ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.08;
@@ -336,10 +338,26 @@ export function mountHero(section: HTMLElement, canvas: HTMLCanvasElement, { var
   let reveal = 0;
   let lastOpacity = -1;
   let last = now();
+  // If frames run long (slow GPU), step the resolution down instead of stuttering.
+  let slowFrames = 0, sampled = 0;
+  const adapt = (rawDt: number) => {
+    if (pixelRatio <= 1) return;
+    sampled++;
+    if (rawDt > 0.028) slowFrames++;
+    if (sampled < 60) return;
+    if (slowFrames > 30) {
+      pixelRatio = Math.max(1, pixelRatio - 0.25);
+      renderer.setPixelRatio(pixelRatio);
+      resize();
+    }
+    slowFrames = sampled = 0;
+  };
   const frame = () => {
     const t = now();
-    const dt = Math.min(0.05, t - last);
+    const rawDt = t - last;
+    const dt = Math.min(0.05, rawDt);
     last = t;
+    if (rawDt < 0.5) adapt(rawDt);
     uniforms.uTime.value = t;
 
     const r = section.getBoundingClientRect();
