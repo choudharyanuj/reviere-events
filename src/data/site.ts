@@ -28,24 +28,24 @@ export const wa = {
 
 export const nav = [
   { label: 'Home', href: '/', key: 'home' },
-  { label: 'Services', href: '/events.html', key: 'events' },
-  { label: 'About', href: '/about.html', key: 'about' },
-  { label: 'Contact', href: '/contact.html', key: 'contact' },
+  { label: 'Services', href: '/events', key: 'events' },
+  { label: 'About', href: '/about', key: 'about' },
+  { label: 'Contact', href: '/contact', key: 'contact' },
 ] as const;
 
 export const footerNav = [
   { label: 'Home', href: '/' },
-  { label: 'Services', href: '/events.html' },
-  { label: 'About Manish', href: '/about.html' },
-  { label: 'Contact Us', href: '/contact.html' },
+  { label: 'Services', href: '/events' },
+  { label: 'About Manish', href: '/about' },
+  { label: 'Contact Us', href: '/contact' },
 ];
 
 export const footerServices = [
-  { label: 'Wedding Planning', href: '/events.html#wedding' },
-  { label: 'Corporate Events', href: '/events.html#corporate' },
-  { label: 'Transportation Facility', href: '/events.html#transportation' },
-  { label: 'Security & Bodyguards', href: '/events.html#security' },
-  { label: 'Stage Shows & Dance', href: '/events.html#dance' },
+  { label: 'Wedding Planning', href: '/events#wedding' },
+  { label: 'Corporate Events', href: '/events#corporate' },
+  { label: 'Transportation Facility', href: '/events#transportation' },
+  { label: 'Security & Bodyguards', href: '/events#security' },
+  { label: 'Stage Shows & Dance', href: '/events#dance' },
 ];
 
 export const meta = {
@@ -113,7 +113,7 @@ export const home = {
     tagline: 'Crafting Unforgettable Moments',
     description:
       'Founded & Directed by Manish Kumar. Premium Event Planning & Management — Weddings, Corporate Events, Private Celebrations & Stage Performances tailored for Patna and beyond.',
-    primary: { label: 'Explore Our Services', href: '/events.html' },
+    primary: { label: 'Explore Our Services', href: '/events' },
     secondary: {
       label: 'Book via WhatsApp',
       wa: 'Hi Manish! I visited Reviere Events website and would like to consult on an upcoming event.',
@@ -265,7 +265,7 @@ export const home = {
     title: 'Ready to Plan Your Next Event?',
     text: "Let's discuss your vision, budget, and requirements. Chat with Manish Kumar directly on WhatsApp for an instant consultation.",
     primary: { label: 'Chat on WhatsApp', wa: 'Hi Manish! I want to start planning an upcoming event.' },
-    secondary: { label: 'Fill Inquiry Form', href: '/contact.html' },
+    secondary: { label: 'Fill Inquiry Form', href: '/contact' },
   },
 };
 
@@ -417,7 +417,7 @@ export const eventsPage = {
     title: "Let's Discuss Your Event Requirements",
     text: 'Get a custom quote and vendor recommendation for your upcoming event in Patna.',
     primary: { label: 'Consult on WhatsApp', wa: 'Hi Manish! I want to consult on an upcoming event.' },
-    secondary: { label: 'Go to Contact Form', href: '/contact.html' },
+    secondary: { label: 'Go to Contact Form', href: '/contact' },
   },
 };
 
@@ -514,7 +514,7 @@ export const aboutPage = {
       label: 'Connect on WhatsApp',
       wa: 'Hi Manish! I read the Reviere Events about page and would like to discuss an upcoming event.',
     },
-    secondary: { label: 'Send an Inquiry', href: '/contact.html' },
+    secondary: { label: 'Send an Inquiry', href: '/contact' },
   },
 };
 

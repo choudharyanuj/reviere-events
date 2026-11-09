@@ -18,7 +18,8 @@ const m = page === '404'
   ? { title: 'Page not found | Reviere Events', description: meta.home.description, ogTitle: meta.home.ogTitle, ogDescription: meta.home.ogDescription }
   : meta[page];
 const keywords = 'keywords' in m ? m.keywords : undefined;
-const path = { home: '/', about: '/about.html', events: '/events.html', contact: '/contact.html', '404': '/' }[page];
+// Clean URLs: hosts serve about.html at /about (Cloudflare Pages redirects /about.html there), so canonicals match.
+const path = { home: '/', about: '/about', events: '/events', contact: '/contact', '404': '/' }[page];
 const canonical = new URL(path, site.url).href;
 const ogImage = new URL(site.ogImage, site.url).href;
 ---

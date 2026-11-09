@@ -34,10 +34,12 @@ running build.
 
 ## Deploying
 
-**Production (Vercel, same as the current site):** import the repo and choose framework preset
-**Astro**. The build command is `npm run build` and the output directory is `dist`. The pages are
-still `/about.html`, `/events.html` and `/contact.html`, so existing links and search results keep
-working.
+**Production: Cloudflare Pages (Git integration).** Use the Astro preset with build command `npm run build` and
+output directory `dist`. The Node version comes from `.node-version`. Pages serves `about.html` at `/about` and
+308-redirects `/about.html` there; the links, canonicals and sitemap already use these clean URLs.
+`public/_headers` caches fingerprinted assets for a year, adds security headers, and marks every
+`*.pages.dev` hostname `noindex` so that only www.reviereevent.com ranks. Domain-level redirects
+(reviereevent.com → www, and reviereevent.in → www.reviereevent.com) are Cloudflare Redirect Rules on the zones.
 
 **Sub-path preview (GitHub Pages):**
 `SITE_BASE=/reviere-events PUBLIC_PREVIEW=1 npm run build`. A preview build tells search engines
