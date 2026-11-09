@@ -6,3 +6,4 @@ _tools/shots/
 dist-preview/
 _source/gen/
 dist-prod/
+dist-full/
