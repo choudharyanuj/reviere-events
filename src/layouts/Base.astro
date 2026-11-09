@@ -33,7 +33,10 @@ const ogImage = new URL(site.ogImage, site.url).href;
     {keywords && <meta name="keywords" content={keywords} />}
     <link rel="canonical" href={canonical} />
     <meta name="theme-color" content="#07070a" />
+    <link rel="icon" href={u('/favicon.ico')} sizes="48x48" />
     <link rel="icon" type="image/svg+xml" href={u('/favicon.svg')} />
+    <link rel="apple-touch-icon" href={u('/apple-touch-icon.png')} />
+    <link rel="manifest" href={u('/site.webmanifest')} />
     <link rel="preload" as="font" type="font/woff2" href={displayWoff2} crossorigin />
     <link rel="preload" as="font" type="font/woff2" href={sansWoff2} crossorigin />
     <link rel="preload" as="font" type="font/woff2" href={monoWoff2} crossorigin />
