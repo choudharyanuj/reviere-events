@@ -8,7 +8,7 @@ const base = process.env.SITE_BASE || '/';
 // Until launch, production builds only the under-construction notice (./construction), with none of the
 // site's CSS, scripts or images. Set LAUNCHED = true to put the full site live. PUBLIC_FULL_SITE=1 builds
 // the full site regardless (preview and test builds).
-const LAUNCHED = false;
+const LAUNCHED = true;
 const fullSite = LAUNCHED || process.env.PUBLIC_FULL_SITE === '1';
 
 export default defineConfig({
