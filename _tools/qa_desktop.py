@@ -22,7 +22,6 @@ def wait_for(pg, js, timeout=4.0):
 def settle(pg, timeout=4.0):
     """Wait until any fold glide has finished and scrollY stops changing; return seconds taken."""
     pg.wait_for_timeout(300)
-    wait_for(pg, '!(window.__rvFoldBusy && __rvFoldBusy())', 8)
     t0, last, still = time.time(), pg.evaluate('scrollY'), 0
     while time.time() - t0 < timeout:
         pg.wait_for_timeout(50)
@@ -89,62 +88,68 @@ with sync_playwright() as p:
     check('B accordion', 'clicking an open row closes it', heads.nth(4).get_attribute('aria-expanded') == 'false')
     ctx.close()
 
-    # ───────── C. Scrolling: folds ─────────
+    # ───────── C. Scrolling: native momentum + scroll-linked scenes ─────────
     ctx, pg, errs = page('/')
-    pg.evaluate('document.fonts.ready'); pg.wait_for_timeout(400)
-    folds = pg.evaluate('__rvFoldStops()')
-    near = lambda y, t: abs(y - t) <= 3
-    check('C folds', 'fold scrolling is active on laptop screens', len(folds) > 5, f'{len(folds)} stops: {folds}')
+    pg.evaluate('document.fonts.ready'); pg.wait_for_timeout(300)
+    near = lambda a, b, tol=3: abs(a - b) <= tol
+    tx = lambda: pg.evaluate("(() => { const m = new DOMMatrix(getComputedStyle(document.querySelector('[data-gal-track]')).transform); return m.m41; })()")
     pg.mouse.move(700, 500)
-    t0 = time.time(); pg.mouse.wheel(0, 100); settle(pg, 6); took = time.time() - t0
-    check('C folds', 'one wheel notch lands exactly on the next fold', near(pg.evaluate('scrollY'), folds[1]), f'{pg.evaluate("scrollY"):.0f} vs fold {folds[1]}')
-    check('C folds', 'the move to the next fold finishes promptly', took < 2.0, f'{took:.2f}s (incl. settle wait)')
-    pg.mouse.wheel(0, 2500); settle(pg, 6)
-    check('C folds', 'a hard fling still stops at the very next fold', near(pg.evaluate('scrollY'), folds[2]), f'{pg.evaluate("scrollY"):.0f} vs fold {folds[2]}')
-    pg.mouse.wheel(0, -100); settle(pg, 6)
-    check('C folds', 'one notch up returns to the previous fold', near(pg.evaluate('scrollY'), folds[1]), f'{pg.evaluate("scrollY"):.0f} vs fold {folds[1]}')
-    pg.keyboard.press('Home'); wait_for(pg, 'scrollY < 5', 12); settle(pg)
-    visited = [0]
-    for _ in range(80):
-        pg.mouse.wheel(0, 120); settle(pg, 6)
-        y = round(pg.evaluate('scrollY'))
-        if y == visited[-1]: break
-        visited.append(y)
-    live = pg.evaluate('__rvFoldStops()')
-    missed = [f for f in live if not any(near(v, f) for v in visited)]
-    check('C folds', 'stepping down visits every fold in order and reaches the footer', not missed and visited == sorted(visited) and near(visited[-1], live[-1]) and len(visited) == len(live), f'missed {missed}, visited {visited}, stops {live}')
-    y1 = folds[3]; pg.evaluate(f"window.scrollTo(0, {y1})"); settle(pg)
-    pg.mouse.wheel(0, 400); settle(pg, 6); pg.mouse.wheel(0, -400); settle(pg, 6)
+    y0 = pg.evaluate('scrollY'); pg.mouse.wheel(0, 300); settle(pg)
+    check('C scroll', 'the page follows the input exactly (no snapping, no hijacking)', near(pg.evaluate('scrollY') - y0, 300), f'{pg.evaluate("scrollY") - y0:+.0f}px')
+    y0 = pg.evaluate('scrollY'); pg.mouse.wheel(0, 200); pg.mouse.wheel(0, 200); settle(pg)
+    check('C scroll', 'rapid input is never ignored', near(pg.evaluate('scrollY') - y0, 400), f'{pg.evaluate("scrollY") - y0:+.0f}px')
+    tl = pg.evaluate("getComputedStyle(document.querySelector('[data-reveal]')).animationTimeline")
+    check('C scenes', 'reveals are driven by the scroll position (browser scroll timeline)', 'view' in tl, tl)
+    pg.evaluate('window.scrollTo(0, 0)'); settle(pg)
+    o0 = pg.evaluate("+getComputedStyle(document.querySelector('.hero-scroll')).opacity")
+    pg.evaluate('window.scrollTo(0, 450)'); settle(pg)
+    o1 = pg.evaluate("+getComputedStyle(document.querySelector('.hero-scroll')).opacity")
+    check('C scenes', 'the hero drifts away in step with the scroll', o0 > 0.95 and 0.2 < o1 < 0.85, f'opacity {o0:.2f} at top, {o1:.2f} halfway')
+    pg.evaluate("document.querySelectorAll('.glow-tile')[5].scrollIntoView({block: 'center'})"); settle(pg)
+    op = pg.evaluate("+getComputedStyle(document.querySelectorAll('.glow-tile')[5]).opacity")
+    check('C scenes', 'content in view is fully shown', op > 0.98, f'{op:.2f}')
+    g = pg.evaluate("(() => { const s = document.querySelector('[data-gallery]'); let y = 0; for (let n = s; n; n = n.offsetParent) y += n.offsetTop; return {top: y, run: parseFloat(getComputedStyle(s).getPropertyValue('--gal-run')) || 0, pinned: s.classList.contains('is-pinned')}; })()")
+    check('C scenes', 'the highlights gallery is a pinned scene on laptops', g['pinned'] and g['run'] > 300, str(g))
+    stage_top = "document.querySelector('.gal-stage').getBoundingClientRect().top"
+    pg.evaluate(f"window.scrollTo(0, {g['top']})"); settle(pg); x0, s0 = tx(), pg.evaluate(stage_top)
+    pg.evaluate(f"window.scrollTo(0, {g['top'] + g['run'] / 2})"); settle(pg); x1, s1 = tx(), pg.evaluate(stage_top)
+    pg.evaluate(f"window.scrollTo(0, {g['top'] + g['run']})"); settle(pg); x2 = tx()
+    pg.evaluate(f"window.scrollTo(0, {g['top'] + g['run'] + 400})"); settle(pg); s3 = pg.evaluate(stage_top)
+    check('C scenes', 'scrolling moves the pinned gallery sideways, start to end', near(x0, 0, 4) and near(x1, -g['run'] / 2, 8) and near(x2, -g['run'], 4), f'x {x0:.0f} -> {x1:.0f} -> {x2:.0f} (run {g["run"]:.0f})')
+    check('C scenes', 'the stage stays pinned through the runway, then releases', near(s0, 0, 2) and near(s1, 0, 2) and s3 < -300, f'stage top {s0:.0f}, {s1:.0f}, then {s3:.0f}')
+    y1 = 2400; pg.evaluate(f"window.scrollTo(0, {y1})"); settle(pg)
+    pg.mouse.wheel(0, 400); settle(pg); pg.mouse.wheel(0, -400); settle(pg)
     check('C scroll', 'down-then-up returns to the same place (no drift)', near(pg.evaluate('scrollY'), y1), f'{pg.evaluate("scrollY") - y1:+.0f}px')
     pg.keyboard.press('End'); wait_for(pg, 'scrollY >= document.documentElement.scrollHeight - innerHeight - 5', 12); settle(pg, 6)
     maxy = pg.evaluate('document.documentElement.scrollHeight - innerHeight')
     check('C scroll', 'End key reaches the bottom', pg.evaluate('scrollY') >= maxy - 5, f'{pg.evaluate("scrollY"):.0f}/{maxy:.0f}')
     pg.keyboard.press('Home'); wait_for(pg, 'scrollY < 5', 12); settle(pg, 6)
     check('C scroll', 'Home key returns to the top', pg.evaluate('scrollY') < 5, f'{pg.evaluate("scrollY"):.0f}')
-    target = folds[4]; pg.evaluate(f"window.scrollTo(0, {target})"); settle(pg)
+    pg.evaluate("window.scrollTo(0, 3000)"); settle(pg)
     pg.reload(wait_until='load'); pg.wait_for_timeout(1200); settle(pg)
-    check('C scroll', 'reload returns to the same fold', near(pg.evaluate('scrollY'), target), f'{pg.evaluate("scrollY"):.0f} vs {target}')
-    # gallery
-    track = pg.locator('[data-gal-track]')
-    track.scroll_into_view_if_needed(); settle(pg)
-    tb = track.bounding_box(); gx, gy = tb['x'] + tb['width'] / 2, tb['y'] + tb['height'] / 2
-    pg.mouse.move(gx, gy)
-    y0, l0 = pg.evaluate('scrollY'), track.evaluate('t => t.scrollLeft')
-    pg.mouse.wheel(0, 300); settle(pg)
-    check('C gallery', 'vertical wheel over the gallery scrolls the page', pg.evaluate('scrollY') > y0 + 100 and abs(track.evaluate('t => t.scrollLeft') - l0) < 5,
-          f'page {pg.evaluate("scrollY") - y0:+.0f}px, gallery {track.evaluate("t => t.scrollLeft") - l0:+.0f}px')
-    track.scroll_into_view_if_needed(); settle(pg)
+    check('C scroll', 'reload keeps the scroll position', near(pg.evaluate('scrollY'), 3000), f'{pg.evaluate("scrollY"):.0f}')
+    # gallery: on laptops a vertical wheel over it scrolls the page (and drives the scene)
+    tb = pg.locator('[data-gal-track]').bounding_box()
+    pg.evaluate(f"window.scrollTo(0, {g['top']})"); settle(pg)
+    pg.mouse.move(700, 450); y0 = pg.evaluate('scrollY'); pg.mouse.wheel(0, 300); settle(pg)
+    check('C gallery', 'vertical wheel over the gallery scrolls the page', pg.evaluate('scrollY') > y0 + 100, f'page {pg.evaluate("scrollY") - y0:+.0f}px')
+    check('C scroll', 'no horizontal page overflow', pg.evaluate('document.documentElement.scrollWidth <= innerWidth'))
+    # history
+    pg.evaluate("window.scrollTo(0, 2200)"); settle(pg)
+    pg.locator('.nav-link[href$="/events"]').first.click(); pg.wait_for_load_state('load'); pg.wait_for_timeout(600)
+    pg.go_back(wait_until='load'); pg.wait_for_timeout(1200); settle(pg)
+    check('C scroll', 'Back button returns to the previous scroll position', near(pg.evaluate('scrollY'), 2200), f'{pg.evaluate("scrollY"):.0f}')
+    ctx.close()
+
+    # tablet: the gallery is a swipeable strip; a sideways swipe moves it, not the page
+    ctx, pg, errs = page('/', w=900, h=1000)
+    track = pg.locator('[data-gal-track]'); track.scroll_into_view_if_needed(); settle(pg)
     tb = track.bounding_box(); pg.mouse.move(tb['x'] + tb['width'] / 2, tb['y'] + tb['height'] / 2)
     y0, l0 = pg.evaluate('scrollY'), track.evaluate('t => t.scrollLeft')
     pg.mouse.wheel(300, 0); pg.wait_for_timeout(900)
-    check('C gallery', 'sideways trackpad swipe scrolls the gallery, not the page', track.evaluate('t => t.scrollLeft') > l0 + 50 and abs(pg.evaluate('scrollY') - y0) < 5,
+    check('C gallery', 'tablet: sideways swipe scrolls the gallery, not the page', track.evaluate('t => t.scrollLeft') > l0 + 50 and abs(pg.evaluate('scrollY') - y0) < 5,
           f'gallery {track.evaluate("t => t.scrollLeft") - l0:+.0f}px, page {pg.evaluate("scrollY") - y0:+.0f}px')
-    check('C scroll', 'no horizontal page overflow', pg.evaluate('document.documentElement.scrollWidth <= innerWidth'))
-    # history
-    pg.evaluate(f"window.scrollTo(0, {folds[5]})"); settle(pg)
-    pg.locator('.nav-link[href$="/events"]').first.click(); pg.wait_for_load_state('load'); pg.wait_for_timeout(600)
-    pg.go_back(wait_until='load'); pg.wait_for_timeout(1200); settle(pg)
-    check('C scroll', 'Back button returns to the same fold', near(pg.evaluate('scrollY'), folds[5]), f'{pg.evaluate("scrollY"):.0f} vs {folds[5]}')
+    check('C gallery', 'tablet: gallery is not pinned', not pg.evaluate("document.querySelector('[data-gallery]').classList.contains('is-pinned')"))
     check('C scroll', 'no JS errors', not errs, ' | '.join(errs[:3]))
     ctx.close()
 

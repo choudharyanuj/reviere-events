@@ -353,10 +353,7 @@ export function mountHero(section: HTMLElement, canvas: HTMLCanvasElement, { var
     }
     slowFrames = sampled = 0;
   };
-  const glide = document.documentElement.classList;
   const frame = () => {
-    // Hold the last frame while the page glides between folds: the GPU is left to the scroll.
-    if (glide.contains('is-gliding') && !reduced) return;
     const t = now();
     const rawDt = t - last;
     const dt = Math.min(0.05, rawDt);
@@ -424,7 +421,7 @@ export function mountHero(section: HTMLElement, canvas: HTMLCanvasElement, { var
   } else {
     let visible = true;
     const run = () => renderer.setAnimationLoop(visible && !document.hidden ? frame : null);
-    // Render only while a meaningful part of the hero is on screen (not for a sliver under the next fold).
+    // Render only while a meaningful part of the hero is on screen (not for a sliver at the top of the next section).
     new IntersectionObserver(([en]) => {
       visible = en.intersectionRatio >= 0.2;
       run();

@@ -29,124 +29,6 @@ const scrollToTarget = (target: number | HTMLElement, offset = 0) => {
 
 const root = document.documentElement;
 let holds = 0;
-/* ───────── Fold-by-fold scrolling (laptops/desktops) ─────────
-   One wheel/trackpad gesture = one fold. Stops are every section start (.fold), plus screen-sized steps
-   through sections taller than the screen, so nothing is skipped or unreachable. A trackpad's inertia tail
-   is ignored; a fresh swipe is recognised at once. Left native: sideways swipes, Ctrl/pinch zoom, form
-   fields, tab lists, the scrollbar, Home/End, links, phones and reduced motion. */
-const foldsOn = () => !reduced && fine && innerWidth >= 1024 && innerHeight >= 600 && $$('.fold').length > 1;
-const foldStops = () => {
-  const vh = innerHeight;
-  const max = document.documentElement.scrollHeight - vh;
-  const navH = (navEl?.offsetHeight ?? 72) + 4;
-  const raw = [0, max];
-  $$('.fold').forEach((el) => {
-    const top = docTop(el) - (el.classList.contains('fold-nav') ? navH : 0);
-    raw.push(top);
-    const h = el.offsetHeight;
-    if (h > vh * 1.1) {
-      const step = vh - navH - 40; // keep a strip of the previous screen for context
-      for (let y = top + step; y < top + h - vh; y += step) raw.push(y);
-      raw.push(top + h - vh);
-    }
-  });
-  const stops: number[] = [];
-  raw.map((y) => Math.round(Math.max(0, Math.min(max, y)))).sort((a, b) => a - b)
-    .forEach((y) => (stops.length === 0 || y - stops[stops.length - 1] > 48) && stops.push(y));
-  if (max - stops[stops.length - 1] > 0 && max - stops[stops.length - 1] <= 48) stops[stops.length - 1] = max;
-  return stops;
-};
-// Read by the QA script.
-// The glide itself is the browser's native smooth scroll, which Chrome and Safari run on the compositor
-// thread: it stays fluid even if JavaScript is busy. While it runs, the 3D/spotlight renders pause and
-// the next section's entrance animations wait until it lands (see afterGlide).
-let gliding = false;
-const glideQueue: (() => void)[] = [];
-const afterGlide = (fn: () => void) => (gliding ? glideQueue.push(fn) : fn());
-const endGlide = () => {
-  if (!gliding) return;
-  gliding = false;
-  root.classList.remove('is-gliding');
-  if (holds === 0) root.style.overflowAnchor = '';
-  glideQueue.splice(0).forEach((fn) => fn());
-};
-Object.assign(window, { __rvFoldStops: foldStops, __rvFoldBusy: () => gliding });
-
-const foldTo = (dir: 1 | -1) => {
-  const stops = foldStops();
-  const y = scrollY;
-  const target = dir > 0 ? stops.find((s) => s > y + 2) : [...stops].reverse().find((s) => s < y - 2);
-  if (target === undefined) return false;
-  gliding = true;
-  root.classList.add('is-gliding');
-  root.style.overflowAnchor = 'none';
-  const t0 = performance.now();
-  let poll = 0;
-  let retried = false;
-  const done = () => {
-    // If the glide was cut short (something interrupted the smooth scroll), finish the move once.
-    if (!retried && Math.abs(scrollY - target) > 2 && performance.now() - t0 < 2500) {
-      retried = true;
-      window.scrollTo({ top: target, behavior: 'smooth' });
-      return;
-    }
-    document.removeEventListener('scrollend', done);
-    clearInterval(poll);
-    endGlide();
-  };
-  document.addEventListener('scrollend', done);
-  // Fallback where 'scrollend' is missing: finish on arrival, or after 2.5s whatever happens.
-  poll = window.setInterval(() => (Math.abs(scrollY - target) < 1 || performance.now() - t0 > 2500) && done(), 60);
-  window.scrollTo({ top: target, behavior: 'smooth' });
-  return true;
-};
-const scrollsInside = (target: EventTarget | null, dy: number) => {
-  for (let n = target as HTMLElement | null; n && n !== document.body; n = n.parentElement) {
-    const oy = getComputedStyle(n).overflowY;
-    if ((oy === 'auto' || oy === 'scroll') && n.scrollHeight > n.clientHeight + 1) {
-      if ((dy > 0 && n.scrollTop + n.clientHeight < n.scrollHeight - 1) || (dy < 0 && n.scrollTop > 0)) return true;
-    }
-  }
-  return false;
-};
-let lastWheel = 0, lastMove = -1e9, recent: number[] = [];
-addEventListener(
-  'wheel',
-  (e) => {
-    if (!foldsOn() || e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.deltaY === 0) return;
-    const now = performance.now();
-    const gap = now - lastWheel;
-    const mag = Math.abs(e.deltaY) * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? innerHeight : 1);
-    if (gliding) {
-      // Swallow the rest of the gesture (trackpad inertia) cheaply: no style or layout reads mid-glide.
-      e.preventDefault();
-      lastWheel = now;
-      recent = [...recent.slice(-5), mag];
-      return;
-    }
-    if (scrollsInside(e.target, e.deltaY) || document.documentElement.style.overflow === 'hidden') return;
-    e.preventDefault();
-    lastWheel = now;
-    const prev = recent.length ? Math.min(...recent.slice(-3)) : 0;
-    recent = gap > 180 ? [mag] : [...recent.slice(-5), mag];
-    // New gesture: after a pause, or a clear re-acceleration inside a trackpad's inertia tail.
-    const fresh = gap > 180 || (mag >= 20 && mag > prev * 2 && now - lastMove > 450);
-    if (!fresh) return;
-    if (foldTo(e.deltaY > 0 ? 1 : -1)) lastMove = now;
-  },
-  { passive: false },
-);
-addEventListener('keydown', (e) => {
-  if (!foldsOn() || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
-  const t = e.target as HTMLElement;
-  if (t.closest('input, textarea, select, [contenteditable="true"], [role="tablist"], [data-gal-track], iframe')) return;
-  const dir = e.key === 'PageDown' || e.key === 'ArrowDown' || (e.key === ' ' && !e.shiftKey) ? 1
-    : e.key === 'PageUp' || e.key === 'ArrowUp' || (e.key === ' ' && e.shiftKey) ? -1 : 0;
-  if (!dir || (e.key === ' ' && t.closest('button, a'))) return;
-  e.preventDefault();
-  if (!gliding) foldTo(dir);
-});
-
 /* ───────── Exact scroll restoration on reload / Back ─────────
    The browser restores before the web fonts settle the layout, which can land a few hundred px off.
    Restore ourselves once fonts are ready, unless the visitor has already started scrolling. */
@@ -184,7 +66,7 @@ const revealer = new IntersectionObserver(
     entries.forEach((en) => {
       if (en.isIntersecting) {
         revealer.unobserve(en.target);
-        afterGlide(() => en.target.classList.add('is-in')); // animate in once the glide has landed
+        en.target.classList.add('is-in');
       }
     }),
   { rootMargin: '0px 0px -6% 0px', threshold: 0.1 },
@@ -225,13 +107,13 @@ if (!reduced) {
         const el = en.target as HTMLElement;
         const target = Number(el.dataset.counter);
         const o = { v: 0 };
-        afterGlide(() => gsap.to(o, {
+        gsap.to(o, {
           v: target,
           duration: 2.2,
           ease: 'power3.out',
           onUpdate: () => (el.textContent = String(Math.floor(o.v))),
           onComplete: () => (el.textContent = String(target)),
-        }));
+        });
       }),
     { rootMargin: '0px 0px -8% 0px' },
   );
@@ -454,9 +336,26 @@ if (gallery) {
       imgs[i]?.style.setProperty('--px', `${-6.5 - d * 6}%`);
     });
   };
-  track.addEventListener('scroll', update, { passive: true });
-  addEventListener('resize', update);
-  update();
+  // Desktop: pinned scene driven by CSS scroll-driven animations; the runway equals the sideways travel.
+  const pinMQ = matchMedia('(min-width: 1024px) and (pointer: fine) and (prefers-reduced-motion: no-preference)');
+  const canPin = CSS.supports('animation-timeline: view()');
+  const pinned = () => gallery.classList.contains('is-pinned');
+  const layout = () => {
+    const pin = canPin && pinMQ.matches;
+    gallery.classList.toggle('is-pinned', pin);
+    if (pin) {
+      track.scrollLeft = 0;
+      gallery.style.setProperty('--gal-run', `${Math.max(0, track.scrollWidth - track.clientWidth)}px`);
+      if (progress) progress.style.transform = '';
+    } else {
+      gallery.style.removeProperty('--gal-run');
+      update();
+    }
+  };
+  track.addEventListener('scroll', () => !pinned() && update(), { passive: true });
+  addEventListener('resize', layout);
+  pinMQ.addEventListener('change', layout);
+  layout();
 
   const step = () => (cards[1]?.offsetWidth ?? 320) + 24;
   $('[data-gal-prev]', gallery)?.addEventListener('click', () => track.scrollBy({ left: -step(), behavior: 'smooth' }));
@@ -464,7 +363,7 @@ if (gallery) {
 
   let down = false, startX = 0, startLeft = 0, moved = 0, vel = 0, lastX = 0, lastT = 0, raf = 0;
   track.addEventListener('pointerdown', (e) => {
-    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    if (e.pointerType !== 'mouse' || e.button !== 0 || pinned()) return;
     down = true;
     startX = lastX = e.clientX;
     startLeft = track.scrollLeft;
@@ -746,10 +645,9 @@ if (hero && heroCanvas) {
 
 const spots = $$('[data-spotlight]');
 if (spots.length) {
-  // Prepare the stage lights while the visitor is still near the top (idle, never mid-glide), so nothing
-  // has to be built mid-journey. Their render loops only run while they are on screen.
+  // Prepare the stage lights while the visitor is still near the top (at idle), so nothing has to be
+  // built mid-scroll. Their render loops only run while they are on screen.
   const mountAll = () => {
-    if (gliding) return void setTimeout(mountAll, 150);
     import('./spotlight')
       .then((m) => spots.forEach((s) => m.mountSpotlight(s, reduced)))
       .catch(() => {});

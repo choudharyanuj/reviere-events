@@ -21,7 +21,7 @@ const ringText = 'REVIERE EVENTS • PATNA, BIHAR • REVIERE EVENTS • PATNA, 
 <Base page="about">
   <PageHero title={hero.title} subtitle={hero.subtitle} crumb={hero.crumb} />
 
-  <section class="fold section" id="bio">
+  <section class="section" id="bio">
     <div class="shell grid gap-16 md:grid-cols-12 md:gap-10">
       <div class="md:col-span-5">
         <div class="relative md:sticky md:top-[calc(var(--nav-h)+2.5rem)]" data-reveal="scale">
@@ -82,7 +82,7 @@ const ringText = 'REVIERE EVENTS • PATNA, BIHAR • REVIERE EVENTS • PATNA, 
   </section>
 
   <!-- Quote: words light up as you scroll, under stage lights -->
-  <section class="fold section relative isolate overflow-hidden bg-bg-2" data-spotlight>
+  <section class="section relative isolate overflow-clip bg-bg-2" data-spotlight>
     <canvas class="absolute inset-0 -z-10 h-full w-full opacity-0 transition-opacity duration-[1400ms]" data-spotlight-canvas aria-hidden="true"></canvas>
     <div class="shell py-10 text-center md:py-20">
       <Icon name="Quote" class="mx-auto h-10 w-10 text-orange" stroke={1.25} />

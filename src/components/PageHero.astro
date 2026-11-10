@@ -4,10 +4,10 @@ import { u } from '../lib/url';
 interface Props { title: string; subtitle: string; crumb: string }
 const { title, subtitle, crumb } = Astro.props;
 ---
-<section class="fold relative isolate flex min-h-[82svh] items-end overflow-hidden pt-[calc(var(--nav-h)+5rem)] pb-14 md:min-h-[86svh] md:pb-20" data-hero3d="page" data-cursor="Spin">
+<section class="relative isolate flex min-h-[82svh] items-end overflow-hidden pt-[calc(var(--nav-h)+5rem)] pb-14 md:min-h-[86svh] md:pb-20" data-hero3d="page" data-cursor="Spin">
   <div class="aurora absolute inset-0 -z-20" aria-hidden="true"></div>
   <canvas class="absolute inset-0 -z-10 h-full w-full opacity-0 transition-opacity duration-[1600ms]" data-hero-canvas aria-hidden="true"></canvas>
-  <div class="shell w-full">
+  <div class="hero-scroll shell w-full">
     <nav aria-label="Breadcrumb" class="hero-fade flex items-center gap-2 font-mono text-xs tracking-wider text-muted uppercase">
       <a href={u('/')} class="link-underline">Home</a>
       <span aria-hidden="true">/</span>

@@ -136,14 +136,7 @@ export function mountSpotlight(section: HTMLElement, reduced: boolean) {
 
   let raf = 0;
   let visible = false;
-  const glide = document.documentElement.classList;
   const loop = (now: number) => {
-    if (glide.contains('is-gliding')) {
-      // Hold the last frame while the page glides between folds.
-      last = now;
-      raf = requestAnimationFrame(loop);
-      return;
-    }
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     aim += (aimTarget - aim) * (1 - Math.exp(-dt * 2.5));

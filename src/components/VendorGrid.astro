@@ -4,7 +4,7 @@ import Icon from './Icon.astro';
 interface Props { eyebrow: string; title: string; subtitle: string; items: { icon: string; title: string; desc: string }[]; cta?: { label: string; wa: string } }
 const { eyebrow, title, subtitle, items, cta } = Astro.props;
 ---
-<section class="fold section relative overflow-hidden bg-bg-2">
+<section class="section relative overflow-clip bg-bg-2">
   <div class="aurora pointer-events-none absolute inset-0 opacity-50" aria-hidden="true"></div>
   <div class="shell relative">
     <SectionHead eyebrow={eyebrow} title={title} subtitle={subtitle} />

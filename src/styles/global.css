@@ -253,10 +253,27 @@ html.js [data-split].is-in .split-word > span { transform: none; }
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
-/* On laptops each fold should fit one screen, so section spacing follows the screen height there. */
-@media (min-width: 1024px) {
-  .fold.section { padding-block: clamp(4.5rem, 10vh, 8.5rem); }
+/* ─────────────── Apple-style scroll scenes ───────────────
+   Scroll-driven animations (Chrome, Edge, Safari 26+): the browser computes them from the scroll position
+   itself, so they move exactly with the trackpad and reverse when scrolling back. Other browsers keep the
+   time-based reveals above; reduced motion keeps everything still. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html.js [data-reveal] { opacity: 1; transform: none; transition: none; animation-name: sd-rise; animation-timing-function: linear; animation-fill-mode: both; animation-timeline: view(); animation-range: entry 5% cover 30%; }
+    html.js [data-reveal="fade"] { animation-name: sd-fade; }
+    html.js [data-reveal="scale"] { animation-name: sd-scale; }
+    /* The hero section is the timeline subject (its own overflow clipping would hide the page scroll);
+       inset 0 so the menu-bar scroll-padding does not shift the timing. */
+    [data-hero3d] { view-timeline-name: --hero; view-timeline-axis: block; view-timeline-inset: 0px; }
+    .hero-scroll { animation-name: hero-exit; animation-timing-function: linear; animation-fill-mode: both; animation-timeline: --hero; animation-range: exit 0% exit 100%; }
+    .cta-scene { animation-name: cta-in; animation-timing-function: linear; animation-fill-mode: both; animation-timeline: view(); animation-range: entry 0% cover 45%; }
+  }
 }
+@keyframes sd-rise { from { opacity: 0; transform: translate3d(0, 64px, 0); } }
+@keyframes sd-fade { from { opacity: 0; } }
+@keyframes sd-scale { from { opacity: 0; transform: scale(0.9); } }
+@keyframes hero-exit { to { opacity: 0; transform: translate3d(0, 24vh, 0) scale(0.94); } }
+@keyframes cta-in { from { opacity: 0.4; transform: scale(0.88); } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-delay: 0ms !important; transition-duration: 0.001ms !important; transition-delay: 0ms !important; }

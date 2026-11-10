@@ -4,7 +4,7 @@ interface Props { eyebrow: string; title: string; subtitle: string; steps: { tit
 const { eyebrow, title, subtitle, steps, alt = false } = Astro.props;
 const pad = (n: number) => String(n).padStart(2, '0');
 ---
-<section class:list={['fold section', alt && 'bg-bg-2']} data-timeline>
+<section class:list={['section', alt && 'bg-bg-2']} data-timeline>
   <div class="shell grid gap-16 md:grid-cols-12">
     <div class="md:col-span-5">
       <div class="md:sticky md:top-[calc(var(--nav-h)+3.5rem)]">

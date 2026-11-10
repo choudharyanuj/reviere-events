@@ -59,23 +59,30 @@ with sync_playwright() as p:
     tabs = pg.locator('[data-t-tab]')
     tabs.nth(1).scroll_into_view_if_needed(); tabs.nth(1).click(); pg.wait_for_timeout(300)
     check('home: testimonial tab switches the quote', pg.locator('[data-t-slide]').nth(1).get_attribute('class').find('is-active') >= 0 and tabs.nth(1).get_attribute('aria-selected') == 'true')
-    track = pg.locator('[data-gal-track]')
-    track.scroll_into_view_if_needed()
+    check('home: highlights gallery is a pinned scroll scene on laptops', pg.evaluate("document.querySelector('[data-gallery]').classList.contains('is-pinned')"))
+    pg.locator('.wa-fab').click()
+    check('home: floating WhatsApp button works', wa_text(pg.evaluate('window.__opened')[-1]) == 'Hi Manish! I want to inquire about Event Planning & Management.')
+    check('home: no JS errors', not errs, ' | '.join(errs))
+    ctx.close()
+
+    # ── Home (tablet): swipeable gallery strip with arrows and mouse drag ──
+    tctx = b.new_context(viewport={'width': 900, 'height': 1000}); pg = tctx.new_page(); errs = []
+    pg.on('pageerror', lambda e: errs.append(str(e))); pg.route('**/hero3d*', lambda r: r.abort()); pg.route('**/spotlight*', lambda r: r.abort())
+    pg.goto(BASE + '/', wait_until='load'); pg.wait_for_timeout(600)
+    track = pg.locator('[data-gal-track]'); track.scroll_into_view_if_needed(); pg.wait_for_timeout(500)
     before = track.evaluate('t => t.scrollLeft')
     pg.locator('[data-gal-next]').click()
     moved = False
     for _ in range(30):  # smooth scroll: allow up to 3s on a slow machine
         pg.wait_for_timeout(100)
         if track.evaluate('t => t.scrollLeft') > before + 50: moved = True; break
-    check('home: gallery next-arrow scrolls the highlights', moved, f"scrollLeft {before} -> {track.evaluate('t => t.scrollLeft')}")
+    check('tablet: gallery next-arrow scrolls the highlights', moved, f"scrollLeft {before} -> {track.evaluate('t => t.scrollLeft')}")
     box = track.bounding_box()
     pg.mouse.move(box['x'] + box['width'] * 0.7, box['y'] + 200); pg.mouse.down()
-    pg.mouse.move(box['x'] + box['width'] * 0.2, box['y'] + 200, steps=8); pg.mouse.up(); pg.wait_for_timeout(1200)
-    check('home: gallery can be dragged with the mouse', track.evaluate('t => t.scrollLeft') > before + 200)
-    pg.locator('.wa-fab').click()
-    check('home: floating WhatsApp button works', wa_text(pg.evaluate('window.__opened')[-1]) == 'Hi Manish! I want to inquire about Event Planning & Management.')
-    check('home: no JS errors', not errs, ' | '.join(errs))
-    ctx.close()
+    pg.mouse.move(box['x'] + box['width'] * 0.1, box['y'] + 200, steps=8); pg.mouse.up(); pg.wait_for_timeout(1200)
+    check('tablet: gallery can be dragged with the mouse', track.evaluate('t => t.scrollLeft') > before + 200, f"scrollLeft {track.evaluate('t => t.scrollLeft')}")
+    check('tablet: no JS errors', not errs, ' | '.join(errs))
+    tctx.close()
 
     # ── Home (phone): menu drawer ──
     ctx, pg, errs = page('/', mobile=True)
