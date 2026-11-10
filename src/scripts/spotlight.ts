@@ -65,23 +65,31 @@ export function mountSpotlight(section: HTMLElement, reduced: boolean) {
   const gl = canvas?.getContext('webgl2', { premultipliedAlpha: true, antialias: false, alpha: true });
   if (!canvas || !gl) return;
 
-  const compile = (type: number, src: string) => {
+  const shader = (type: number, src: string) => {
     const s = gl.createShader(type)!;
     gl.shaderSource(s, src);
     gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) ?? 'shader');
     return s;
   };
   const prog = gl.createProgram()!;
-  try {
-    gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS));
-    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS));
-    gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog) ?? 'link');
-  } catch (err) {
-    console.warn('[spotlight] disabled:', err);
+  gl.attachShader(prog, shader(gl.VERTEX_SHADER, VS));
+  gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, FS));
+  gl.linkProgram(prog);
+  // Let the GPU driver compile in the background (KHR_parallel_shader_compile): asking for the link
+  // status right away would block the page until compilation finishes.
+  const parallel = gl.getExtension('KHR_parallel_shader_compile');
+  const ready = () => !parallel || gl.getProgramParameter(prog, parallel.COMPLETION_STATUS_KHR);
+  const whenReady = () => (ready() ? start() : requestAnimationFrame(whenReady));
+  requestAnimationFrame(whenReady);
+
+  function start() {
+  if (!gl!.getProgramParameter(prog, gl!.LINK_STATUS)) {
+    console.warn('[spotlight] disabled:', gl!.getProgramInfoLog(prog));
     return;
   }
+  setup(gl!, canvas!);
+  }
+  function setup(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement) {
   gl.useProgram(prog);
   const buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
@@ -128,7 +136,14 @@ export function mountSpotlight(section: HTMLElement, reduced: boolean) {
 
   let raf = 0;
   let visible = false;
+  const glide = document.documentElement.classList;
   const loop = (now: number) => {
+    if (glide.contains('is-gliding')) {
+      // Hold the last frame while the page glides between folds.
+      last = now;
+      raf = requestAnimationFrame(loop);
+      return;
+    }
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     aim += (aimTarget - aim) * (1 - Math.exp(-dt * 2.5));
@@ -147,10 +162,11 @@ export function mountSpotlight(section: HTMLElement, reduced: boolean) {
   resize();
   new ResizeObserver(resize).observe(section);
   new IntersectionObserver(([en]) => {
-    visible = en.isIntersecting;
+    visible = en.intersectionRatio >= 0.15;
     run();
-  }).observe(section);
+  }, { threshold: [0, 0.15, 0.5, 1] }).observe(section);
   document.addEventListener('visibilitychange', run);
   if (reduced) draw(8);
   canvas.classList.remove('opacity-0');
+  }
 }

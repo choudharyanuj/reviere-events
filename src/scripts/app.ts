@@ -57,29 +57,47 @@ const foldStops = () => {
   return stops;
 };
 // Read by the QA script.
-Object.assign(window, { __rvFoldStops: foldStops, __rvFoldBusy: () => foldAnimating });
+// The glide itself is the browser's native smooth scroll, which Chrome and Safari run on the compositor
+// thread: it stays fluid even if JavaScript is busy. While it runs, the 3D/spotlight renders pause and
+// the next section's entrance animations wait until it lands (see afterGlide).
+let gliding = false;
+const glideQueue: (() => void)[] = [];
+const afterGlide = (fn: () => void) => (gliding ? glideQueue.push(fn) : fn());
+const endGlide = () => {
+  if (!gliding) return;
+  gliding = false;
+  root.classList.remove('is-gliding');
+  if (holds === 0) root.style.overflowAnchor = '';
+  glideQueue.splice(0).forEach((fn) => fn());
+};
+Object.assign(window, { __rvFoldStops: foldStops, __rvFoldBusy: () => gliding });
 
-let foldAnimating = false;
 const foldTo = (dir: 1 | -1) => {
   const stops = foldStops();
   const y = scrollY;
   const target = dir > 0 ? stops.find((s) => s > y + 2) : [...stops].reverse().find((s) => s < y - 2);
   if (target === undefined) return false;
-  const y0 = y, d = target - y0, t0 = performance.now();
-  const dur = Math.max(560, Math.min(900, (Math.abs(d) / innerHeight) * 640));
-  const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-  foldAnimating = true;
+  gliding = true;
+  root.classList.add('is-gliding');
   root.style.overflowAnchor = 'none';
-  const step = () => {
-    const p = Math.min(1, (performance.now() - t0) / dur);
-    window.scrollTo(0, y0 + d * ease(p));
-    if (p < 1) requestAnimationFrame(step);
-    else {
-      foldAnimating = false;
-      if (holds === 0) root.style.overflowAnchor = '';
+  const t0 = performance.now();
+  let poll = 0;
+  let retried = false;
+  const done = () => {
+    // If the glide was cut short (something interrupted the smooth scroll), finish the move once.
+    if (!retried && Math.abs(scrollY - target) > 2 && performance.now() - t0 < 2500) {
+      retried = true;
+      window.scrollTo({ top: target, behavior: 'smooth' });
+      return;
     }
+    document.removeEventListener('scrollend', done);
+    clearInterval(poll);
+    endGlide();
   };
-  requestAnimationFrame(step);
+  document.addEventListener('scrollend', done);
+  // Fallback where 'scrollend' is missing: finish on arrival, or after 2.5s whatever happens.
+  poll = window.setInterval(() => (Math.abs(scrollY - target) < 1 || performance.now() - t0 > 2500) && done(), 60);
+  window.scrollTo({ top: target, behavior: 'smooth' });
   return true;
 };
 const scrollsInside = (target: EventTarget | null, dy: number) => {
@@ -96,15 +114,21 @@ addEventListener(
   'wheel',
   (e) => {
     if (!foldsOn() || e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.deltaY === 0) return;
-    if (scrollsInside(e.target, e.deltaY) || document.documentElement.style.overflow === 'hidden') return;
-    e.preventDefault();
     const now = performance.now();
     const gap = now - lastWheel;
-    lastWheel = now;
     const mag = Math.abs(e.deltaY) * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? innerHeight : 1);
+    if (gliding) {
+      // Swallow the rest of the gesture (trackpad inertia) cheaply: no style or layout reads mid-glide.
+      e.preventDefault();
+      lastWheel = now;
+      recent = [...recent.slice(-5), mag];
+      return;
+    }
+    if (scrollsInside(e.target, e.deltaY) || document.documentElement.style.overflow === 'hidden') return;
+    e.preventDefault();
+    lastWheel = now;
     const prev = recent.length ? Math.min(...recent.slice(-3)) : 0;
     recent = gap > 180 ? [mag] : [...recent.slice(-5), mag];
-    if (foldAnimating) return;
     // New gesture: after a pause, or a clear re-acceleration inside a trackpad's inertia tail.
     const fresh = gap > 180 || (mag >= 20 && mag > prev * 2 && now - lastMove > 450);
     if (!fresh) return;
@@ -120,7 +144,7 @@ addEventListener('keydown', (e) => {
     : e.key === 'PageUp' || e.key === 'ArrowUp' || (e.key === ' ' && e.shiftKey) ? -1 : 0;
   if (!dir || (e.key === ' ' && t.closest('button, a'))) return;
   e.preventDefault();
-  if (!foldAnimating) foldTo(dir);
+  if (!gliding) foldTo(dir);
 });
 
 /* ───────── Exact scroll restoration on reload / Back ─────────
@@ -159,8 +183,8 @@ const revealer = new IntersectionObserver(
   (entries) =>
     entries.forEach((en) => {
       if (en.isIntersecting) {
-        en.target.classList.add('is-in');
         revealer.unobserve(en.target);
+        afterGlide(() => en.target.classList.add('is-in')); // animate in once the glide has landed
       }
     }),
   { rootMargin: '0px 0px -6% 0px', threshold: 0.1 },
@@ -201,13 +225,13 @@ if (!reduced) {
         const el = en.target as HTMLElement;
         const target = Number(el.dataset.counter);
         const o = { v: 0 };
-        gsap.to(o, {
+        afterGlide(() => gsap.to(o, {
           v: target,
           duration: 2.2,
           ease: 'power3.out',
           onUpdate: () => (el.textContent = String(Math.floor(o.v))),
           onComplete: () => (el.textContent = String(target)),
-        });
+        }));
       }),
     { rootMargin: '0px 0px -8% 0px' },
   );
@@ -722,24 +746,17 @@ if (hero && heroCanvas) {
 
 const spots = $$('[data-spotlight]');
 if (spots.length) {
-  const lazy = new IntersectionObserver(
-    (entries) =>
-      entries.forEach((en) => {
-        if (!en.isIntersecting) return;
-        lazy.unobserve(en.target);
-        // Mount when the browser is idle and no fold glide is running: compiling the shader blocks a frame or two.
-        const mount = () => {
-          if (foldAnimating) return void setTimeout(mount, 120);
-          import('./spotlight')
-            .then((m) => m.mountSpotlight(en.target as HTMLElement, reduced))
-            .catch(() => {});
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(mount, { timeout: 1500 });
-        else setTimeout(mount, 200);
-      }),
-    { rootMargin: '500px 0px' },
-  );
-  spots.forEach((s) => lazy.observe(s));
+  // Prepare the stage lights while the visitor is still near the top (idle, never mid-glide), so nothing
+  // has to be built mid-journey. Their render loops only run while they are on screen.
+  const mountAll = () => {
+    if (gliding) return void setTimeout(mountAll, 150);
+    import('./spotlight')
+      .then((m) => spots.forEach((s) => m.mountSpotlight(s, reduced)))
+      .catch(() => {});
+  };
+  const later = () => ('requestIdleCallback' in window ? requestIdleCallback(mountAll, { timeout: 2500 }) : setTimeout(mountAll, 800));
+  if (document.readyState === 'complete') later();
+  else addEventListener('load', later, { once: true });
 }
 
 queueFx();

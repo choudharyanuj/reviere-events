@@ -121,7 +121,8 @@ void main() {
 export function mountHero(section: HTMLElement, canvas: HTMLCanvasElement, { variant, reduced }: Options) {
   let renderer: WebGLRenderer;
   try {
-    renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+    // Multisampling only on low-density screens; on Retina the pixel density already hides the edges.
+    renderer = new WebGLRenderer({ canvas, antialias: devicePixelRatio < 1.5, alpha: true, powerPreference: 'high-performance' });
   } catch {
     return; // No WebGL: the CSS glow behind the hero stays as the backdrop.
   }
@@ -352,7 +353,10 @@ export function mountHero(section: HTMLElement, canvas: HTMLCanvasElement, { var
     }
     slowFrames = sampled = 0;
   };
+  const glide = document.documentElement.classList;
   const frame = () => {
+    // Hold the last frame while the page glides between folds: the GPU is left to the scroll.
+    if (glide.contains('is-gliding') && !reduced) return;
     const t = now();
     const rawDt = t - last;
     const dt = Math.min(0.05, rawDt);
@@ -410,17 +414,24 @@ export function mountHero(section: HTMLElement, canvas: HTMLCanvasElement, { var
   resize();
   new ResizeObserver(resize).observe(section);
 
+  // Compile every shader in the background first (three.js compileAsync uses KHR_parallel_shader_compile),
+  // so the first frame never freezes the page.
+  const compiled = typeof renderer.compileAsync === 'function' ? renderer.compileAsync(scene, camera) : Promise.resolve();
+  compiled.catch(() => {}).then(() => begin());
+  function begin() {
   if (reduced) {
     renderOnce();
   } else {
     let visible = true;
     const run = () => renderer.setAnimationLoop(visible && !document.hidden ? frame : null);
+    // Render only while a meaningful part of the hero is on screen (not for a sliver under the next fold).
     new IntersectionObserver(([en]) => {
-      visible = en.isIntersecting;
+      visible = en.intersectionRatio >= 0.2;
       run();
-    }).observe(section);
+    }, { threshold: [0, 0.2, 0.5, 1] }).observe(section);
     document.addEventListener('visibilitychange', run);
     frame();
     run();
+  }
   }
 }

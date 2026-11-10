@@ -25,6 +25,7 @@ with sync_playwright() as p:
         pg.on('console', lambda m: m.type == 'error' and not (block3d and ('ERR_FAILED' in m.text)) and errs.append(m.text))
         if block3d:
             pg.route('**/hero3d*', lambda r: r.abort())
+            pg.route('**/spotlight*', lambda r: r.abort())
         pg.add_init_script(STUB)
         pg.goto(BASE + path, wait_until='load')
         pg.wait_for_timeout(600)

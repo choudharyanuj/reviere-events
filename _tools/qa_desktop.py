@@ -29,7 +29,7 @@ def settle(pg, timeout=4.0):
         y = pg.evaluate('scrollY')
         still = still + 1 if abs(y - last) < 0.5 else 0
         last = y
-        if still >= 4:
+        if still >= 8:
             return time.time() - t0 - 0.2
     return timeout
 
@@ -42,10 +42,11 @@ with sync_playwright() as p:
         errs = []
         pg.on('pageerror', lambda e: errs.append(str(e)))
         pg.on('console', lambda m: m.type == 'error' and 'ERR_FAILED' not in m.text and errs.append(m.text))
-        if block3d:
+        if block3d:  # this test box has no GPU: emulated WebGL would starve everything else
             pg.route('**/hero3d*', lambda r: r.abort())
+            pg.route('**/spotlight*', lambda r: r.abort())
         pg.add_init_script("window.open = () => null; window.__qaLog = [];")
-        pg.goto(BASE + path, wait_until='load')
+        pg.goto(BASE + path, wait_until='load', timeout=60000)
         pg.wait_for_timeout(700)
         return ctx, pg, errs
 
@@ -194,6 +195,16 @@ with sync_playwright() as p:
     check('E resize', 'hero canvas follows a window resize', abs(cw[0] - cw[1]) < 2, f'{cw}')
     check('E resize', 'no horizontal overflow at 1024px', pg.evaluate('document.documentElement.scrollWidth <= innerWidth'))
     check('E 3d', 'no JS errors with 3D running', not errs, ' | '.join(errs[:3]))
+    ctx.close()
+
+    # spotlights on their own: they load, draw and raise no errors
+    ctx = b.new_context(viewport={'width': 1440, 'height': 900}); pg = ctx.new_page(); errs = []
+    pg.on('pageerror', lambda e: errs.append(str(e))); pg.route('**/hero3d*', lambda r: r.abort())
+    pg.goto(BASE + '/about', wait_until='load'); pg.wait_for_timeout(2500)
+    pg.evaluate("document.querySelector('[data-spotlight]').scrollIntoView()"); pg.wait_for_timeout(3000)
+    op = pg.evaluate("[...document.querySelectorAll('[data-spotlight-canvas]')].map(c => +getComputedStyle(c).opacity)")
+    check('E spotlight', 'stage spotlights load and draw', bool(op) and max(op) > 0.5, str(op))
+    check('E spotlight', 'no JS errors from the spotlights', not errs, ' | '.join(errs[:3]))
     ctx.close()
 
     # ───────── F. Content ─────────
