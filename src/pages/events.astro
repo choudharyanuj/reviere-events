@@ -16,7 +16,7 @@ const { hero, services, vendors, process, cta } = eventsPage;
   <PageHero title={hero.title} subtitle={hero.subtitle} crumb={hero.crumb} />
 
   <!-- Scroll-spy service switcher (sticky only while the services are on screen) -->
-  <div>
+  <div class="fold">
     <div class="sticky top-[calc(var(--nav-h)+0.25rem)] z-30 mt-10" data-spy>
       <div class="shell">
         <nav aria-label="Jump to a service" class="glass no-scrollbar mx-auto flex w-max max-w-full gap-1 overflow-x-auto rounded-full p-1.5">
@@ -36,7 +36,7 @@ const { hero, services, vendors, process, cta } = eventsPage;
         {
           services.map((s, i) => (
             <div class="flex" data-reveal style={`--d:${(i % 2) * 100}ms`}>
-              <article id={s.id} class="sheen card group flex w-full flex-col overflow-hidden rounded-[2rem]" data-tilt>
+              <article id={s.id} class="sheen card group flex w-full scroll-mt-[9.5rem] flex-col overflow-hidden rounded-[2rem]" data-tilt>
                 <div class="relative aspect-[16/9] overflow-hidden">
                   <Picture
                     src={scenes[s.image as SceneKey]}

@@ -20,8 +20,9 @@ def wait_for(pg, js, timeout=4.0):
     return False
 
 def settle(pg, timeout=4.0):
-    """Wait until scrollY stops changing; return seconds taken."""
+    """Wait until any fold glide has finished and scrollY stops changing; return seconds taken."""
     pg.wait_for_timeout(300)
+    wait_for(pg, '!(window.__rvFoldBusy && __rvFoldBusy())', 8)
     t0, last, still = time.time(), pg.evaluate('scrollY'), 0
     while time.time() - t0 < timeout:
         pg.wait_for_timeout(50)
@@ -50,46 +51,25 @@ with sync_playwright() as p:
 
     # Read the preview only after the browser has drawn ~15 more frames, so a fade has really been rendered
     # (this GPU-less test box can stall frame production for seconds; wall-clock waits are not enough).
-    preview_op = "new Promise(r => { let n = 0; (function f(){ if (++n < 15) requestAnimationFrame(f); else r(+getComputedStyle(document.querySelector('[data-svc-preview]')).opacity); })(); })"
-    preview_state = "(() => { const p = document.querySelector('[data-svc-preview]'); return [p.classList.contains('is-shown'), p.getAttribute('style'), getComputedStyle(p).transitionProperty, __qaLog.slice(-3)]; })()"
+    frames = "n => new Promise(r => { let i = 0; (function f(){ if (++i < n) requestAnimationFrame(f); else r(); })(); })"
 
-    # ───────── A. Service list image previews ─────────
+    # ───────── A. Service images ─────────
     ctx, pg, errs = page('/')
     heads = pg.locator('[data-acc-trigger]')
-    pg.evaluate("document.getElementById('services').scrollIntoView()"); pg.mouse.wheel(0, 350); settle(pg)
-    def hover_head(i, dx=0.3):
-        hb = heads.nth(i).bounding_box()
-        x, y = hb['x'] + hb['width'] * dx, hb['y'] + hb['height'] / 2
-        pg.mouse.move(x - 10, y); pg.mouse.move(x, y, steps=4); pg.wait_for_timeout(700)
-        return x, y
-    hover_head(2)
-    check('A preview', 'appears when hovering a closed service title', pg.evaluate(preview_op) > 0.5)
-    hover_head(2); heads.nth(2).click(); pg.wait_for_timeout(1200)
-    check('A preview', 'hidden once the service is opened (must not cover its details)', pg.evaluate(preview_op) < 0.05, f'opacity {pg.evaluate(preview_op):.2f} state {pg.evaluate(preview_state)}')
-    hover_head(4)
-    pg.mouse.wheel(0, 260); settle(pg); pg.wait_for_timeout(400)
-    check('A preview', 'hidden after scrolling with the cursor still', pg.evaluate(preview_op) < 0.05, f'opacity {pg.evaluate(preview_op):.2f} state {pg.evaluate(preview_state)}')
-    hover_head(4)
-    pg.keyboard.press('PageDown'); settle(pg); pg.wait_for_timeout(400)
-    check('A preview', 'hidden after keyboard scrolling', pg.evaluate(preview_op) < 0.05, f'opacity {pg.evaluate(preview_op):.2f} state {pg.evaluate(preview_state)}')
-    pg.keyboard.press('PageUp'); settle(pg)
-    hover_head(4)
-    pg.mouse.move(4, 450, steps=3); pg.wait_for_timeout(700)
-    check('A preview', 'hidden after the cursor leaves the list sideways', pg.evaluate(preview_op) < 0.05, f'opacity {pg.evaluate(preview_op):.2f} state {pg.evaluate(preview_state)}')
-    x, y = hover_head(4, dx=0.985)
-    box = pg.evaluate("(() => { const r = document.querySelector('[data-svc-preview]').getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom]; })()")
-    covers = box[0] <= x <= box[2] and box[1] <= y <= box[3] and pg.evaluate(preview_op) > 0.05
-    check('A preview', 'never sits under the cursor (e.g. over the +/icon buttons)', not covers, f'cursor {int(x)},{int(y)} preview {[int(v) for v in box]}')
-    pg.keyboard.press('Escape'); heads.nth(1).scroll_into_view_if_needed(); settle(pg); pg.wait_for_timeout(300)
-    visible = [i for i in range(heads.count()) if 120 < heads.nth(i).bounding_box()['y'] < 820]
-    for i in visible[:4]:
-        hover_head(i)
-    pg.mouse.move(700, 30, steps=6); pg.wait_for_timeout(800)
-    check('A preview', 'hidden after sweeping rows then leaving upwards', pg.evaluate(preview_op) < 0.05, f'opacity {pg.evaluate(preview_op):.2f} state {pg.evaluate(preview_state)}')
-    hover_head(1)
-    pg.evaluate("window.dispatchEvent(new Event('blur')); document.documentElement.dispatchEvent(new PointerEvent('pointerleave'))"); pg.wait_for_timeout(700)
-    check('A preview', 'hidden when the cursor leaves the window', pg.evaluate(preview_op) < 0.05, f'opacity {pg.evaluate(preview_op):.2f} state {pg.evaluate(preview_state)}')
-    check('A preview', 'no JS errors', not errs, ' | '.join(errs[:3]))
+    check('A images', 'no floating image preview exists anywhere', pg.locator('[data-svc-preview]').count() == 0)
+    heads.nth(2).scroll_into_view_if_needed(); settle(pg); pg.evaluate(frames, 30)
+    hb = heads.nth(2).bounding_box(); pg.mouse.move(hb['x'] + hb['width'] * 0.3, hb['y'] + hb['height'] / 2, steps=4); pg.evaluate(frames, 20)
+    covered = pg.evaluate("""() => [...document.querySelectorAll('.svc-title')].filter(t => { const r = t.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return false;
+        const el = document.elementFromPoint(r.left + Math.min(r.width, 300) / 2, r.top + r.height / 2); return el && el.closest('picture, img'); }).length""")
+    check('A images', 'hovering a service puts nothing over any title', covered == 0, f'{covered} titles covered')
+    pg.mouse.click(hb['x'] + hb['width'] * 0.3, hb['y'] + hb['height'] / 2); pg.wait_for_timeout(1200); pg.evaluate(frames, 60)
+    m = pg.evaluate("""() => { const li = document.querySelectorAll('.svc')[2], img = li.querySelector('.svc-media img'), head = li.querySelector('.svc-head'), next = document.querySelectorAll('.svc')[3];
+        const r = img.getBoundingClientRect(); return { open: li.classList.contains('is-open'), op: +getComputedStyle(img).opacity, w: r.width, top: r.top, bottom: r.bottom, headBottom: head.getBoundingClientRect().bottom, nextTop: next.getBoundingClientRect().top, loaded: img.complete && img.naturalWidth > 0 }; }""")
+    check('A images', 'opening a service shows its photo inside the row', m['open'] and m['op'] > 0.95 and m['w'] > 150 and m['top'] >= m['headBottom'] - 1 and m['bottom'] <= m['nextTop'] + 1, str({k: round(v) if isinstance(v, float) else v for k, v in m.items()}))
+    check('A images', 'the photo has loaded', m['loaded'])
+    closed_op = pg.evaluate("+getComputedStyle(document.querySelectorAll('.svc')[5].querySelector('.svc-media img')).opacity")
+    check('A images', 'closed services keep their photo hidden', closed_op < 0.05, f'{closed_op}')
+    check('A images', 'no JS errors', not errs, ' | '.join(errs[:3]))
     ctx.close()
 
     # ───────── B. Accordion ─────────
@@ -108,21 +88,41 @@ with sync_playwright() as p:
     check('B accordion', 'clicking an open row closes it', heads.nth(4).get_attribute('aria-expanded') == 'false')
     ctx.close()
 
-    # ───────── C. Scrolling ─────────
+    # ───────── C. Scrolling: folds ─────────
     ctx, pg, errs = page('/')
-    for _ in range(6): pg.mouse.wheel(0, 120)
-    t = settle(pg, 6)
-    check('C scroll', 'page settles quickly after the wheel stops (no floaty lag)', t < 0.45, f'{t:.2f}s to settle')
-    y1 = pg.evaluate('scrollY'); pg.mouse.wheel(0, 400); pg.mouse.wheel(0, -400); settle(pg)
-    check('C scroll', 'down-then-up returns to the same place (no drift)', abs(pg.evaluate('scrollY') - y1) < 5, f'{pg.evaluate("scrollY") - y1:+.0f}px')
+    pg.evaluate('document.fonts.ready'); pg.wait_for_timeout(400)
+    folds = pg.evaluate('__rvFoldStops()')
+    near = lambda y, t: abs(y - t) <= 3
+    check('C folds', 'fold scrolling is active on laptop screens', len(folds) > 5, f'{len(folds)} stops: {folds}')
+    pg.mouse.move(700, 500)
+    t0 = time.time(); pg.mouse.wheel(0, 100); settle(pg, 6); took = time.time() - t0
+    check('C folds', 'one wheel notch lands exactly on the next fold', near(pg.evaluate('scrollY'), folds[1]), f'{pg.evaluate("scrollY"):.0f} vs fold {folds[1]}')
+    check('C folds', 'the move to the next fold finishes promptly', took < 2.0, f'{took:.2f}s (incl. settle wait)')
+    pg.mouse.wheel(0, 2500); settle(pg, 6)
+    check('C folds', 'a hard fling still stops at the very next fold', near(pg.evaluate('scrollY'), folds[2]), f'{pg.evaluate("scrollY"):.0f} vs fold {folds[2]}')
+    pg.mouse.wheel(0, -100); settle(pg, 6)
+    check('C folds', 'one notch up returns to the previous fold', near(pg.evaluate('scrollY'), folds[1]), f'{pg.evaluate("scrollY"):.0f} vs fold {folds[1]}')
+    pg.keyboard.press('Home'); wait_for(pg, 'scrollY < 5', 12); settle(pg)
+    visited = [0]
+    for _ in range(80):
+        pg.mouse.wheel(0, 120); settle(pg, 6)
+        y = round(pg.evaluate('scrollY'))
+        if y == visited[-1]: break
+        visited.append(y)
+    live = pg.evaluate('__rvFoldStops()')
+    missed = [f for f in live if not any(near(v, f) for v in visited)]
+    check('C folds', 'stepping down visits every fold in order and reaches the footer', not missed and visited == sorted(visited) and near(visited[-1], live[-1]) and len(visited) == len(live), f'missed {missed}, visited {visited}, stops {live}')
+    y1 = folds[3]; pg.evaluate(f"window.scrollTo(0, {y1})"); settle(pg)
+    pg.mouse.wheel(0, 400); settle(pg, 6); pg.mouse.wheel(0, -400); settle(pg, 6)
+    check('C scroll', 'down-then-up returns to the same place (no drift)', near(pg.evaluate('scrollY'), y1), f'{pg.evaluate("scrollY") - y1:+.0f}px')
     pg.keyboard.press('End'); wait_for(pg, 'scrollY >= document.documentElement.scrollHeight - innerHeight - 5', 12); settle(pg, 6)
     maxy = pg.evaluate('document.documentElement.scrollHeight - innerHeight')
     check('C scroll', 'End key reaches the bottom', pg.evaluate('scrollY') >= maxy - 5, f'{pg.evaluate("scrollY"):.0f}/{maxy:.0f}')
     pg.keyboard.press('Home'); wait_for(pg, 'scrollY < 5', 12); settle(pg, 6)
     check('C scroll', 'Home key returns to the top', pg.evaluate('scrollY') < 5, f'{pg.evaluate("scrollY"):.0f}')
-    pg.evaluate("window.scrollTo(0, 3000)"); settle(pg)
-    pg.reload(wait_until='load'); pg.wait_for_timeout(1200)
-    check('C scroll', 'reload keeps the scroll position', abs(pg.evaluate('scrollY') - 3000) < 80, f'{pg.evaluate("scrollY"):.0f}')
+    target = folds[4]; pg.evaluate(f"window.scrollTo(0, {target})"); settle(pg)
+    pg.reload(wait_until='load'); pg.wait_for_timeout(1200); settle(pg)
+    check('C scroll', 'reload returns to the same fold', near(pg.evaluate('scrollY'), target), f'{pg.evaluate("scrollY"):.0f} vs {target}')
     # gallery
     track = pg.locator('[data-gal-track]')
     track.scroll_into_view_if_needed(); settle(pg)
@@ -140,10 +140,10 @@ with sync_playwright() as p:
           f'gallery {track.evaluate("t => t.scrollLeft") - l0:+.0f}px, page {pg.evaluate("scrollY") - y0:+.0f}px')
     check('C scroll', 'no horizontal page overflow', pg.evaluate('document.documentElement.scrollWidth <= innerWidth'))
     # history
-    pg.evaluate("window.scrollTo(0, 2200)"); settle(pg)
+    pg.evaluate(f"window.scrollTo(0, {folds[5]})"); settle(pg)
     pg.locator('.nav-link[href$="/events"]').first.click(); pg.wait_for_load_state('load'); pg.wait_for_timeout(600)
-    pg.go_back(wait_until='load'); pg.wait_for_timeout(1200)
-    check('C scroll', 'Back button returns to the previous scroll position', abs(pg.evaluate('scrollY') - 2200) < 120, f'{pg.evaluate("scrollY"):.0f}')
+    pg.go_back(wait_until='load'); pg.wait_for_timeout(1200); settle(pg)
+    check('C scroll', 'Back button returns to the same fold', near(pg.evaluate('scrollY'), folds[5]), f'{pg.evaluate("scrollY"):.0f} vs {folds[5]}')
     check('C scroll', 'no JS errors', not errs, ' | '.join(errs[:3]))
     ctx.close()
 

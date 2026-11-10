@@ -37,20 +37,21 @@ with sync_playwright() as p:
     opened = pg.evaluate('window.__opened')
     check('home: hero WhatsApp button opens wa.me with its message',
           len(opened) == 1 and opened[0].startswith('https://wa.me/918893535829') and wa_text(opened[0]) == 'Hi Manish! I visited Reviere Events website and would like to consult on an upcoming event.', str(opened))
-    for _ in range(14):
-        pg.mouse.wheel(0, 700); pg.wait_for_timeout(250)
+    for _ in range(16):  # step fold by fold, as a visitor would
+        pg.mouse.wheel(0, 700); pg.wait_for_timeout(350)
+        pg.wait_for_function('!(window.__rvFoldBusy && __rvFoldBusy())', timeout=8000)
     pg.wait_for_timeout(1200)
     # gallery cards sit off-screen sideways until swiped, so they reveal on horizontal scroll instead
     total = pg.locator('[data-reveal]:not(.gal-card)').count(); shown = pg.locator('[data-reveal].is-in:not(.gal-card)').count()
     check('home: every reveal element became visible after scrolling', shown == total, f'{shown}/{total}')
     check('home: counters finished at their targets', pg.locator('[data-counter]').all_inner_texts() == ['50', '7', '150', '100'], str(pg.locator('[data-counter]').all_inner_texts()))
     heads = pg.locator('[data-acc-trigger]')
-    heads.nth(5).scroll_into_view_if_needed(); pg.wait_for_timeout(400)
-    hb = heads.nth(5).bounding_box(); pg.mouse.move(hb['x'] + 300, hb['y'] + hb['height'] / 2); pg.mouse.move(hb['x'] + 320, hb['y'] + hb['height'] / 2, steps=4); pg.wait_for_timeout(700)
-    check('home: hovering a service shows its image preview', pg.evaluate("+getComputedStyle(document.querySelector('[data-svc-preview]')).opacity") > 0.5 and pg.locator('[data-svc-img="5"].is-active').count() == 1)
     heads.nth(2).scroll_into_view_if_needed(); heads.nth(2).click(); pg.wait_for_timeout(300)
     check('home: accordion opens the clicked service and closes the first',
           heads.nth(2).get_attribute('aria-expanded') == 'true' and heads.nth(0).get_attribute('aria-expanded') == 'false')
+    pg.wait_for_timeout(1000)
+    check('home: the opened service shows its photo in the row', pg.evaluate("+getComputedStyle(document.querySelectorAll('.svc')[2].querySelector('.svc-media img')).opacity") > 0.5)
+    check('home: no floating hover preview', pg.locator('[data-svc-preview]').count() == 0)
     pg.evaluate('window.__opened = []')
     pg.locator('#svc-2 [data-wa]').click()
     check('home: service CTA sends that service\'s message', wa_text(pg.evaluate('window.__opened')[0]) == 'Hi Manish! I want to inquire about Private Celebration planning.')
@@ -60,8 +61,12 @@ with sync_playwright() as p:
     track = pg.locator('[data-gal-track]')
     track.scroll_into_view_if_needed()
     before = track.evaluate('t => t.scrollLeft')
-    pg.locator('[data-gal-next]').click(); pg.wait_for_timeout(900)
-    check('home: gallery next-arrow scrolls the highlights', track.evaluate('t => t.scrollLeft') > before)
+    pg.locator('[data-gal-next]').click()
+    moved = False
+    for _ in range(30):  # smooth scroll: allow up to 3s on a slow machine
+        pg.wait_for_timeout(100)
+        if track.evaluate('t => t.scrollLeft') > before + 50: moved = True; break
+    check('home: gallery next-arrow scrolls the highlights', moved, f"scrollLeft {before} -> {track.evaluate('t => t.scrollLeft')}")
     box = track.bounding_box()
     pg.mouse.move(box['x'] + box['width'] * 0.7, box['y'] + 200); pg.mouse.down()
     pg.mouse.move(box['x'] + box['width'] * 0.2, box['y'] + 200, steps=8); pg.mouse.up(); pg.wait_for_timeout(1200)

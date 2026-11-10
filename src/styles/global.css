@@ -253,6 +253,11 @@ html.js [data-split].is-in .split-word > span { transform: none; }
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
+/* On laptops each fold should fit one screen, so section spacing follows the screen height there. */
+@media (min-width: 1024px) {
+  .fold.section { padding-block: clamp(4.5rem, 10vh, 8.5rem); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-delay: 0ms !important; transition-duration: 0.001ms !important; transition-delay: 0ms !important; }
   html.js [data-reveal], html.js [data-split] .split-word > span { opacity: 1 !important; transform: none !important; }

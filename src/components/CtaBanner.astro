@@ -6,7 +6,7 @@ import { u } from '../lib/url';
 interface Props { title: string; text: string; primary: { label: string; wa: string }; secondary: { label: string; href: string } }
 const { title, text, primary, secondary } = Astro.props;
 ---
-<section class="shell py-6 md:py-12">
+<section class="fold fold-nav shell py-6 md:py-12">
   <div class="cta relative isolate overflow-hidden rounded-[2rem] px-6 py-24 text-center md:rounded-[3rem] md:py-40" data-spotlight>
     <div class="cta-bg absolute inset-0 -z-20" aria-hidden="true"></div>
     <canvas class="absolute inset-0 -z-10 h-full w-full opacity-0 transition-opacity duration-[1400ms]" data-spotlight-canvas aria-hidden="true"></canvas>

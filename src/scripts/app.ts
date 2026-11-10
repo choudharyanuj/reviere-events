@@ -27,6 +27,102 @@ const scrollToTarget = (target: number | HTMLElement, offset = 0) => {
   window.scrollTo({ top: y, behavior: reduced ? 'auto' : 'smooth' });
 };
 
+const root = document.documentElement;
+let holds = 0;
+/* ───────── Fold-by-fold scrolling (laptops/desktops) ─────────
+   One wheel/trackpad gesture = one fold. Stops are every section start (.fold), plus screen-sized steps
+   through sections taller than the screen, so nothing is skipped or unreachable. A trackpad's inertia tail
+   is ignored; a fresh swipe is recognised at once. Left native: sideways swipes, Ctrl/pinch zoom, form
+   fields, tab lists, the scrollbar, Home/End, links, phones and reduced motion. */
+const foldsOn = () => !reduced && fine && innerWidth >= 1024 && innerHeight >= 600 && $$('.fold').length > 1;
+const foldStops = () => {
+  const vh = innerHeight;
+  const max = document.documentElement.scrollHeight - vh;
+  const navH = (navEl?.offsetHeight ?? 72) + 4;
+  const raw = [0, max];
+  $$('.fold').forEach((el) => {
+    const top = docTop(el) - (el.classList.contains('fold-nav') ? navH : 0);
+    raw.push(top);
+    const h = el.offsetHeight;
+    if (h > vh * 1.1) {
+      const step = vh - navH - 40; // keep a strip of the previous screen for context
+      for (let y = top + step; y < top + h - vh; y += step) raw.push(y);
+      raw.push(top + h - vh);
+    }
+  });
+  const stops: number[] = [];
+  raw.map((y) => Math.round(Math.max(0, Math.min(max, y)))).sort((a, b) => a - b)
+    .forEach((y) => (stops.length === 0 || y - stops[stops.length - 1] > 48) && stops.push(y));
+  if (max - stops[stops.length - 1] > 0 && max - stops[stops.length - 1] <= 48) stops[stops.length - 1] = max;
+  return stops;
+};
+// Read by the QA script.
+Object.assign(window, { __rvFoldStops: foldStops, __rvFoldBusy: () => foldAnimating });
+
+let foldAnimating = false;
+const foldTo = (dir: 1 | -1) => {
+  const stops = foldStops();
+  const y = scrollY;
+  const target = dir > 0 ? stops.find((s) => s > y + 2) : [...stops].reverse().find((s) => s < y - 2);
+  if (target === undefined) return false;
+  const y0 = y, d = target - y0, t0 = performance.now();
+  const dur = Math.max(560, Math.min(900, (Math.abs(d) / innerHeight) * 640));
+  const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  foldAnimating = true;
+  root.style.overflowAnchor = 'none';
+  const step = () => {
+    const p = Math.min(1, (performance.now() - t0) / dur);
+    window.scrollTo(0, y0 + d * ease(p));
+    if (p < 1) requestAnimationFrame(step);
+    else {
+      foldAnimating = false;
+      if (holds === 0) root.style.overflowAnchor = '';
+    }
+  };
+  requestAnimationFrame(step);
+  return true;
+};
+const scrollsInside = (target: EventTarget | null, dy: number) => {
+  for (let n = target as HTMLElement | null; n && n !== document.body; n = n.parentElement) {
+    const oy = getComputedStyle(n).overflowY;
+    if ((oy === 'auto' || oy === 'scroll') && n.scrollHeight > n.clientHeight + 1) {
+      if ((dy > 0 && n.scrollTop + n.clientHeight < n.scrollHeight - 1) || (dy < 0 && n.scrollTop > 0)) return true;
+    }
+  }
+  return false;
+};
+let lastWheel = 0, lastMove = -1e9, recent: number[] = [];
+addEventListener(
+  'wheel',
+  (e) => {
+    if (!foldsOn() || e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.deltaY === 0) return;
+    if (scrollsInside(e.target, e.deltaY) || document.documentElement.style.overflow === 'hidden') return;
+    e.preventDefault();
+    const now = performance.now();
+    const gap = now - lastWheel;
+    lastWheel = now;
+    const mag = Math.abs(e.deltaY) * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? innerHeight : 1);
+    const prev = recent.length ? Math.min(...recent.slice(-3)) : 0;
+    recent = gap > 180 ? [mag] : [...recent.slice(-5), mag];
+    if (foldAnimating) return;
+    // New gesture: after a pause, or a clear re-acceleration inside a trackpad's inertia tail.
+    const fresh = gap > 180 || (mag >= 20 && mag > prev * 2 && now - lastMove > 450);
+    if (!fresh) return;
+    if (foldTo(e.deltaY > 0 ? 1 : -1)) lastMove = now;
+  },
+  { passive: false },
+);
+addEventListener('keydown', (e) => {
+  if (!foldsOn() || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+  const t = e.target as HTMLElement;
+  if (t.closest('input, textarea, select, [contenteditable="true"], [role="tablist"], [data-gal-track], iframe')) return;
+  const dir = e.key === 'PageDown' || e.key === 'ArrowDown' || (e.key === ' ' && !e.shiftKey) ? 1
+    : e.key === 'PageUp' || e.key === 'ArrowUp' || (e.key === ' ' && e.shiftKey) ? -1 : 0;
+  if (!dir || (e.key === ' ' && t.closest('button, a'))) return;
+  e.preventDefault();
+  if (!foldAnimating) foldTo(dir);
+});
+
 /* ───────── Exact scroll restoration on reload / Back ─────────
    The browser restores before the web fonts settle the layout, which can land a few hundred px off.
    Restore ourselves once fonts are ready, unless the visitor has already started scrolling. */
@@ -265,8 +361,6 @@ $$('[data-glow-group]').forEach((g) => {
 /* ───────── Services index (accordion) ───────── */
 // Keeps an element at the same spot on screen while content above it animates open/closed.
 // Chrome's own scroll anchoring is paused meanwhile; otherwise both correct the same shift and it doubles.
-const root = document.documentElement;
-let holds = 0;
 const holdInPlace = (el: HTMLElement, ms = 1400) => {
   const top0 = el.getBoundingClientRect().top;
   const t0 = performance.now();
@@ -295,81 +389,6 @@ $$('[data-accordion]').forEach((acc) => {
     });
   });
 });
-
-/* ───────── Services: image preview that follows the cursor (mouse only) ─────────
-   Visible only while the mouse is over the title of a closed service. Anything else hides it:
-   opening a row, scrolling (wheel, keys or scrollbar), leaving the list or the window, switching tabs. */
-const preview = $('[data-svc-preview]');
-const accordion = $('[data-accordion]');
-if (preview && accordion && fine && !reduced) {
-  // Only download the preview images once the list is close to the viewport.
-  preview.style.display = 'none';
-  const near = new IntersectionObserver(([en]) => {
-    if (!en.isIntersecting) return;
-    preview.style.display = '';
-    near.disconnect();
-  }, { rootMargin: '600px 0px' });
-  near.observe(accordion);
-
-  const imgs = $$('[data-svc-img]', preview);
-  const xTo = gsap.quickTo(preview, 'x', { duration: 0.6, ease: 'power3' });
-  const yTo = gsap.quickTo(preview, 'y', { duration: 0.6, ease: 'power3' });
-  const rTo = gsap.quickTo(preview, 'rotation', { duration: 0.8, ease: 'power3' });
-  let current = '', shown = false, lastX = 0;
-  // Opt-in trace for automated QA only (window.__qaLog = [] before load).
-  const qa = (...entry: unknown[]) => (window as unknown as { __qaLog?: unknown[] }).__qaLog?.push([Math.round(performance.now()), ...entry]);
-
-  const hide = (e?: Event) => {
-    current = '';
-    if (!shown) return;
-    qa('hide', e?.type ?? 'call');
-    shown = false;
-    preview.classList.remove('is-shown'); // CSS fade: runs on the compositor, immune to main-thread lag
-  };
-  const place = (cx: number, cy: number) => {
-    const w = preview.offsetWidth, h = preview.offsetHeight, gap = 36;
-    // Sit on the side of the cursor with more room, so the preview never covers what it points at.
-    let x = cx > innerWidth * 0.5 ? cx - w - gap : cx + gap;
-    x = Math.max(16, Math.min(innerWidth - w - 16, x));
-    const y = Math.max(16, Math.min(innerHeight - h - 16, cy - h / 2));
-    return { x, y };
-  };
-
-  accordion.addEventListener('pointermove', (e) => {
-    // Chrome sends motionless "fake" moves after scrolling or layout changes; only real movement counts.
-    if (e.pointerType !== 'mouse' || (e.movementX === 0 && e.movementY === 0)) return;
-    const t = e.target as Element;
-    const head = t.closest<HTMLElement>('.svc-head');
-    const row = head?.closest<HTMLElement>('[data-svc]');
-    if (!head || !row || row.classList.contains('is-open')) return hide();
-    const i = row.dataset.svc!;
-    if (i !== current) {
-      imgs.forEach((im) => im.classList.toggle('is-active', im.dataset.svcImg === i));
-      current = i;
-    }
-    const { x, y } = place(e.clientX, e.clientY);
-    if (!shown) {
-      shown = true;
-      qa('show', i, e.movementX, e.movementY, e.isTrusted);
-      gsap.set(preview, { x, y });
-      preview.classList.add('is-shown');
-    }
-    xTo(x);
-    yTo(y);
-    rTo(Math.max(-8, Math.min(8, (e.clientX - lastX) * 0.5)));
-    lastX = e.clientX;
-  });
-  accordion.addEventListener('pointerleave', hide);
-  accordion.addEventListener('pointerdown', hide);
-  addEventListener('scroll', hide, { passive: true });
-  addEventListener('wheel', hide, { passive: true });
-  addEventListener('keydown', hide);
-  addEventListener('blur', hide);
-  addEventListener('resize', hide);
-  document.documentElement.addEventListener('pointerleave', hide);
-  document.addEventListener('visibilitychange', hide);
-  new IntersectionObserver(([en]) => !en.isIntersecting && hide()).observe(accordion);
-}
 
 /* ───────── Ticker leans into the scroll direction ───────── */
 const marquee = $('[data-marquee]');
@@ -708,9 +727,15 @@ if (spots.length) {
       entries.forEach((en) => {
         if (!en.isIntersecting) return;
         lazy.unobserve(en.target);
-        import('./spotlight')
-          .then((m) => m.mountSpotlight(en.target as HTMLElement, reduced))
-          .catch(() => {});
+        // Mount when the browser is idle and no fold glide is running: compiling the shader blocks a frame or two.
+        const mount = () => {
+          if (foldAnimating) return void setTimeout(mount, 120);
+          import('./spotlight')
+            .then((m) => m.mountSpotlight(en.target as HTMLElement, reduced))
+            .catch(() => {});
+        };
+        if ('requestIdleCallback' in window) requestIdleCallback(mount, { timeout: 1500 });
+        else setTimeout(mount, 200);
       }),
     { rootMargin: '500px 0px' },
   );
